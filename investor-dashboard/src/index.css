@@ -1,0 +1,62 @@
+@import './styles/fonts.css';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: #FAF7F0;
+    /* Cloud Off-White */
+    color: #5C4033;
+    /* Deep Brown */
+    @apply font-sans antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: #2F4F4F;
+    /* Deep Heritage Green */
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .card {
+    background: #FAF7F0;
+    /* Cloud Off-White */
+    border: 1px solid rgba(47, 79, 79, 0.12);
+    /* Heritage Green border */
+    box-shadow: 0 12px 24px rgba(92, 64, 51, 0.12);
+    /* Deep Brown shadow */
+    @apply rounded-2xl p-6 md:p-8;
+  }
+
+  .btn-primary {
+    background: #2F4F4F;
+    /* Deep Heritage Green */
+    color: #FAF7F0;
+    /* Cloud Off-White text */
+    @apply px-6 py-3 rounded-full font-medium hover:opacity-90 transition-all duration-300;
+  }
+
+  .btn-outline {
+    border: 1px solid #2F4F4F;
+    /* Heritage Green border */
+    color: #2F4F4F;
+    @apply px-6 py-3 rounded-full font-medium hover:bg-heritage hover:text-cloud transition-all duration-300;
+  }
+}
