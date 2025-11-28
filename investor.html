@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investor Calculator | Mater Maria Wellness Homes</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="logo">
+            <div
+                style="width: 40px; height: 40px; background-color: var(--deep-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--gold); font-weight: bold;">
+                M</div>
+            Mater Maria
+        </div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="resident.html">Residents</a>
+            <a href="investor.html" class="active">Investors</a>
+            <a href="comparison.html">Comparison</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
+
+    <div class="container section">
+        <h1 style="text-align: center; margin-bottom: 40px;">Investor ROI Simulator</h1>
+
+        <div style="display: flex; gap: 40px; flex-wrap: wrap;">
+
+            <!-- Inputs -->
+            <div class="card" style="flex: 1; min-width: 350px;">
+                <div class="card-header">
+                    <h3>Investment Parameters</h3>
+                </div>
+
+                <div class="form-group">
+                    <label for="investTier">Investment Tier</label>
+                    <select id="investTier" class="form-control">
+                        <option value="platinum">Platinum — ₹30 Lakhs (₹20L Share + ₹10L Deposit)</option>
+                        <option value="gold">Gold — ₹20 Lakhs (₹15L Share + ₹5L Deposit)</option>
+                        <option value="silver">Silver — ₹10 Lakhs (₹10L Share + ₹0 Deposit)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="holdingPeriod">Holding Period (Years)</label>
+                    <input type="number" id="holdingPeriod" class="form-control" value="10" min="1" max="30">
+                </div>
+
+                <div class="form-group">
+                    <label for="appreciationRate">Estimated Annual Appreciation</label>
+                    <select id="appreciationRate" class="form-control">
+                        <option value="3">3% Conservative</option>
+                        <option value="5" selected>5% Moderate</option>
+                        <option value="7">7% Aggressive</option>
+                    </select>
+                </div>
+
+                <div style="margin-top: 30px; padding: 15px; background-color: #FAF9F6; border-radius: var(--radius);">
+                    <h4 style="color: var(--deep-green); margin-bottom: 10px;">How Refunds Work</h4>
+                    <p style="font-size: 0.9rem; color: #555;">Refund slabs (90% / 80% / 70%) apply
+                        <strong>ONLY</strong> to the Refundable Deposit portion. Share Capital grows independently.</p>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="card" style="flex: 1; min-width: 350px;">
+                <div class="card-header">
+                    <h3>Projected Returns</h3>
+                </div>
+
+                <table class="results-table">
+                    <tr>
+                        <th>Metric</th>
+                        <th style="text-align: right;">Value</th>
+                    </tr>
+                    <tr>
+                        <td>Total Initial Investment</td>
+                        <td style="text-align: right;" id="inv-paid">-</td>
+                    </tr>
+                    <tr>
+                        <td>Future Share Value</td>
+                        <td style="text-align: right; color: var(--deep-green);" id="inv-share-growth">-</td>
+                    </tr>
+                    <tr>
+                        <td>Refundable Deposit Return</td>
+                        <td style="text-align: right;" id="inv-deposit-refund">-</td>
+                    </tr>
+                    <tr style="font-weight: bold; background-color: #E8E8E8;">
+                        <td>Total Final Return</td>
+                        <td style="text-align: right;" id="inv-total-return">-</td>
+                    </tr>
+                    <tr>
+                        <td>Net Profit</td>
+                        <td style="text-align: right; color: var(--gold); font-weight: bold;" id="inv-net-gain">-</td>
+                    </tr>
+                    <tr>
+                        <td>Approx. IRR</td>
+                        <td style="text-align: right;" id="inv-irr">-</td>
+                    </tr>
+                </table>
+
+                <div style="margin-top: 30px; text-align: center;">
+                    <canvas id="investorChart" width="300" height="200" style="width: 100%; max-width: 300px;"></canvas>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Mater Maria Wellness Homes. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

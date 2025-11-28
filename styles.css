@@ -1,0 +1,361 @@
+:root {
+    --primary: #0E3D2E;
+    --accent: #C6A562;
+    --bg: #FAF7F2;
+    --text: #1F1F1F;
+    --white: #FFFFFF;
+    --border: #E0E0E0;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --radius: 12px;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    padding-bottom: 60px;
+}
+
+/* Navigation Pills */
+.nav-container {
+    display: flex;
+    justify-content: center;
+    padding: 30px 0;
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-pills {
+    background: #E8E8E8;
+    padding: 5px;
+    border-radius: 50px;
+    display: flex;
+    gap: 5px;
+}
+
+.nav-pill {
+    border: none;
+    background: transparent;
+    padding: 10px 25px;
+    border-radius: 40px;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.nav-pill.active {
+    background: var(--white);
+    color: var(--primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Layout */
+.main-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.view-section.hidden {
+    display: none;
+}
+
+.card-header-title {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 30px;
+}
+
+.card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 30px;
+    box-shadow: var(--shadow);
+    margin-bottom: 25px;
+    border: 1px solid var(--border);
+}
+
+.card h3 {
+    font-size: 1.2rem;
+    color: var(--primary);
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 10px;
+    display: inline-block;
+}
+
+/* Inputs */
+.input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #444;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+/* Stepper */
+.stepper {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+    width: fit-content;
+}
+
+.stepper button {
+    background: #f5f5f5;
+    border: none;
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--primary);
+}
+
+.stepper button:hover {
+    background: #e0e0e0;
+}
+
+.stepper-val {
+    width: 40px;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* Slider */
+.slider {
+    width: 100%;
+    accent-color: var(--primary);
+}
+
+/* Snapshot */
+.snapshot-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+
+.snap-col h4 {
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 15px;
+    letter-spacing: 0.5px;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.95rem;
+}
+
+.row.total {
+    font-weight: 700;
+    border-top: 2px solid #eee;
+    border-bottom: none;
+    margin-top: 10px;
+    padding-top: 10px;
+    font-size: 1rem;
+}
+
+.row.green {
+    color: var(--primary);
+}
+
+.row.small-text {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.divider {
+    height: 1px;
+    background: #eee;
+    margin: 15px 0;
+}
+
+/* Net Cost Card */
+.net-cost-card {
+    background: var(--primary);
+    color: white;
+    padding: 30px;
+    border-radius: var(--radius);
+    text-align: center;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 30px rgba(14, 61, 46, 0.2);
+}
+
+.net-title {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.9;
+    margin-bottom: 10px;
+}
+
+.net-amount {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 5px;
+}
+
+.net-subtitle {
+    opacity: 0.8;
+    font-size: 0.9rem;
+}
+
+/* Comparison */
+.chart-wrapper {
+    position: relative;
+    height: 300px;
+    margin-bottom: 20px;
+}
+
+.chart-wrapper.small {
+    height: 200px;
+}
+
+.comparison-text {
+    background: #FDFCF5;
+    border: 1px solid var(--accent);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.data-table th,
+.data-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.data-table th {
+    color: #666;
+    font-weight: 600;
+}
+
+.data-table .highlight {
+    background: #f4f8f6;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+/* Investor View */
+.investor-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.inv-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.inv-table td {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.inv-table .bold-row {
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.info-box {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.info-box h4 {
+    margin-bottom: 5px;
+    color: var(--primary);
+}
+
+/* Comparison View Toggle */
+.comp-toggle-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.comp-toggle-container label {
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.big-stat {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+
+    .input-grid,
+    .snapshot-grid,
+    .investor-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .net-amount {
+        font-size: 2.5rem;
+    }
+}

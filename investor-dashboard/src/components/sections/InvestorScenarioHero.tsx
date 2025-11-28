@@ -1,11 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '../ui/Card';
-import { formatCurrency, calculateMaterMariaValue } from '../../lib/utils';
+import { formatCurrency } from '../../lib/utils';
 import { Minus, Plus, CheckCircle2, Download, AlertTriangle } from 'lucide-react';
 import { DividendCard } from './DividendCard';
 import { generateInvestorPDF } from '../../lib/pdfGenerator';
-import { calculateYearlyBreakdown, calculateShutdownMetrics } from '../../lib/financialModel';
+import { calculateYearlyBreakdown, calculateInvestorMetrics, formatCurrencyINR } from '../../lib/financialModel';
 
 type PlanType = 'platinum' | 'gold' | 'silver';
 
@@ -80,24 +80,16 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
     const plan = PLANS[selectedPlan];
     const totalInvestment = plan.price * lots;
 
-    // Calculate Metrics
-    let mmValue = 0;
-    let irr = 8.68;
-
-    if (isShutdown) {
-        const metrics = calculateShutdownMetrics(totalInvestment);
-        mmValue = metrics.totalShutdownValue;
-        irr = 7.2; // Lower IRR in shutdown case (approx)
-    } else {
-        mmValue = calculateMaterMariaValue(totalInvestment, 15, 'Base');
-    }
-
-    const multiple = mmValue / totalInvestment;
+    // Calculate Metrics using new model
+    const metrics = calculateInvestorMetrics(selectedPlan, lots);
+    const mmValue = metrics.year15Value;  // Year 15 value from model
+    const irr = metrics.approxAnnualReturnEconomic * 100;  // Convert to percentage (8.45%)
+    const multiple = metrics.economicMultiple;  // ~3.38x
 
     // Calculate Dividends for Card
     const breakdown = calculateYearlyBreakdown(totalInvestment, selectedPlan, lots, isShutdown);
     const totalDividends = breakdown.reduce((sum, row) => sum + row.dividend, 0);
-    const avgAnnualDividend = totalDividends / (15 - 2030 + 1 + 5); // Rough avg over period
+    const avgAnnualDividend = totalDividends / 15;
     const returnPercentage = (totalDividends / totalInvestment) * 100;
     const totalDepositInterest = breakdown.reduce((sum, row) => sum + row.depositInterest, 0);
 
@@ -232,7 +224,7 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
                             <div className="relative z-10">
                                 <div className="text-white/60 text-sm font-medium mb-2">ROI at Year 15</div>
                                 <div className="text-4xl lg:text-5xl font-serif font-bold text-accent mb-2">
-                                    {formatCurrency(mmValue)}
+                                    {formatCurrencyINR(mmValue)}
                                 </div>
                                 <div className="inline-flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full text-[10px] text-white/80 mb-8">
                                     {isShutdown ? 'Based on Liquidation Value' : 'Based on 15-year conservative case'}
@@ -252,7 +244,7 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
                                 <div className="mt-6 pt-4 border-t border-white/10 flex justify-between items-end">
                                     <div>
                                         <div className="text-white/40 text-[10px] uppercase tracking-wider mb-1">Total Commitment</div>
-                                        <div className="text-lg font-bold text-white">{formatCurrency(totalInvestment)}</div>
+                                        <div className="text-lg font-bold text-white">{formatCurrencyINR(totalInvestment)}</div>
                                         <div className="text-accent text-[10px] font-medium mt-1">
                                             Ownership in Project: {((totalInvestment / 200000000) * 100).toFixed(2)}% of total equity pool
                                         </div>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resident Pricing & Value Calculator | Mater Maria</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <div class="page-header">
+        <div class="logo">
+            <div class="logo-icon">M</div>
+            Mater Maria
+        </div>
+        <h1>Resident Pricing & Value Calculator</h1>
+    </div>
+
+    <div class="container">
+
+        <!-- Section 1: Inputs -->
+        <div class="section-card input-section">
+            <h2>Customize Your Plan</h2>
+
+            <div class="input-grid">
+                <!-- Room Type -->
+                <div class="form-group full-width">
+                    <label for="roomType">Accommodation Type</label>
+                    <select id="roomType" class="form-control">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+
+                <!-- Residents -->
+                <div class="form-group">
+                    <label>Number of Residents (Max 3)</label>
+                    <div class="stepper">
+                        <button id="resMinus" class="stepper-btn">-</button>
+                        <input type="number" id="numResidents" value="1" min="1" max="3" readonly>
+                        <button id="resPlus" class="stepper-btn">+</button>
+                    </div>
+                </div>
+
+                <!-- Cars -->
+                <div class="form-group">
+                    <label>Number of Cars (Max 3)</label>
+                    <div class="stepper">
+                        <button id="carMinus" class="stepper-btn">-</button>
+                        <input type="number" id="numCars" value="0" min="0" max="3" readonly>
+                        <button id="carPlus" class="stepper-btn">+</button>
+                    </div>
+                </div>
+
+                <!-- Years -->
+                <div class="form-group full-width">
+                    <label>Years of Stay: <span id="yearsValue" class="highlight-text">10</span> Years</label>
+                    <input type="range" id="yearsStay" min="1" max="30" value="10" class="slider">
+                </div>
+
+                <!-- Deposits -->
+                <div class="form-group">
+                    <label>Base Deposit (₹)</label>
+                    <input type="number" id="baseDeposit" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Medical Deposit (₹)</label>
+                    <input type="number" id="medicalDeposit" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Parking Deposit (₹)</label>
+                    <input type="number" id="parkingDeposit" class="form-control">
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Financial Snapshot -->
+        <div class="section-card summary-section">
+            <h2>Your Financial Snapshot</h2>
+
+            <div class="summary-grid">
+                <div class="summary-col">
+                    <h3>Deposits Paid</h3>
+                    <div class="summary-row"><span>Base Deposit</span> <span id="sum-base">-</span></div>
+                    <div class="summary-row"><span>Medical Deposit</span> <span id="sum-medical">-</span></div>
+                    <div class="summary-row"><span>Parking Deposit</span> <span id="sum-parking">-</span></div>
+                    <div class="summary-row total"><span>Total Deposit Paid</span> <span id="sum-total-deposit">-</span>
+                    </div>
+                </div>
+
+                <div class="summary-col">
+                    <h3>Refunds & Maintenance</h3>
+                    <div class="summary-row"><span>Refund Slab</span> <span id="sum-slab-text"
+                            class="info-text">-</span></div>
+                    <div class="summary-row"><span>Refund on Base</span> <span id="sum-refund-base">-</span></div>
+                    <div class="summary-row"><span>Refund (Medical+Parking)</span> <span id="sum-refund-extras">-</span>
+                    </div>
+                    <div class="summary-row total highlight-green"><span>Total Refund to Resident</span> <span
+                            id="sum-total-refund">-</span></div>
+
+                    <div class="divider"></div>
+
+                    <div class="summary-row"><span>Monthly Maintenance</span> <span id="sum-maint-monthly">-</span>
+                    </div>
+                    <div class="summary-row"><span>Total Maintenance</span> <span id="sum-maint-total">-</span></div>
+                </div>
+            </div>
+
+            <div class="net-cost-box">
+                <h3>Net Out-of-Pocket Cost to Resident</h3>
+                <div class="big-price" id="sum-net-cost">-</div>
+                <p>Total Paid - Total Refunded</p>
+            </div>
+        </div>
+
+        <!-- Section 3: Comparison -->
+        <div class="section-card comparison-section">
+            <h2>Value Comparison</h2>
+            <p class="section-desc">How much would this cost if done outside Mater Maria?</p>
+
+            <div class="chart-container">
+                <canvas id="comparisonChart"></canvas>
+            </div>
+
+            <div id="savings-text" class="savings-box">
+                <!-- Populated by JS -->
+            </div>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Option</th>
+                        <th>Monthly Cost (₹)</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="highlight-row">
+                        <td><strong>Mater Maria (Net Equivalent)</strong></td>
+                        <td id="comp-mater">-</td>
+                        <td>Based on your chosen stay length & room type</td>
+                    </tr>
+                    <tr>
+                        <td>Home Nursing + Rent at Home</td>
+                        <td id="comp-home">-</td>
+                        <td>Market estimate (Rent + Care + Food + Utils)</td>
+                    </tr>
+                    <tr>
+                        <td>Other Retirement Facility</td>
+                        <td id="comp-other">-</td>
+                        <td>Market average for similar facilities</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mater Maria Wellness Homes | Pricing & ROI</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <!-- Top Navigation Pill -->
+    <div class="nav-container">
+        <div class="nav-pills">
+            <button class="nav-pill active" data-view="residents">Residents</button>
+            <button class="nav-pill" data-view="investors">Investors</button>
+            <button class="nav-pill" data-view="comparison">Comparison</button>
+        </div>
+    </div>
+
+    <div class="main-container">
+
+        <!-- VIEW 1: RESIDENTS -->
+        <div id="view-residents" class="view-section">
+            <div class="card-header-title">Resident Pricing & Value Calculator</div>
+
+            <!-- (A) Inputs -->
+            <div class="card input-card">
+                <h3>Customize Your Plan</h3>
+                <div class="input-grid">
+                    <div class="form-group full">
+                        <label>Accommodation Type</label>
+                        <select id="roomType" class="form-control"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Residents</label>
+                        <div class="stepper">
+                            <button id="res-minus">-</button>
+                            <span id="res" class="stepper-val">1</span>
+                            <button id="res-plus">+</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cars</label>
+                        <div class="stepper">
+                            <button id="car-minus">-</button>
+                            <span id="car" class="stepper-val">0</span>
+                            <button id="car-plus">+</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group full">
+                        <label id="yearsLabel">10 Years</label>
+                        <input type="range" id="yearsStay" min="1" max="30" value="10" class="slider">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Base Deposit (₹)</label>
+                        <input type="number" id="baseDeposit" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Medical Deposit (₹)</label>
+                        <input type="number" id="medicalDeposit" class="form-control">
+                    </div>
+                </div>
+            </div>
+
+            <!-- (B) Financial Snapshot -->
+            <div class="card snapshot-card">
+                <h3>Your Financial Snapshot</h3>
+                <div class="snapshot-grid">
+                    <div class="snap-col">
+                        <h4>Deposits Paid</h4>
+                        <div class="row"><span>Base Deposit</span> <span id="snap-base">-</span></div>
+                        <div class="row"><span>Medical Deposit</span> <span id="snap-medical">-</span></div>
+                        <div class="row"><span>Parking Deposit</span> <span id="snap-parking">-</span></div>
+                        <div class="row total"><span>Total Deposit Paid</span> <span id="snap-total-deposit">-</span>
+                        </div>
+                    </div>
+                    <div class="snap-col">
+                        <h4>Refunds & Maintenance</h4>
+                        <div class="row small-text"><span id="snap-slab-label">Refund Slab</span></div>
+                        <div class="row"><span>Refund on Base</span> <span id="snap-refund-base">-</span></div>
+                        <div class="row"><span>Refund (Med+Park)</span> <span id="snap-refund-extras">-</span></div>
+                        <div class="row total green"><span>Total Refund</span> <span id="snap-total-refund">-</span>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="row"><span>Monthly Maint.</span> <span id="snap-maint-monthly">-</span></div>
+                        <div class="row"><span>Total Maint.</span> <span id="snap-maint-total">-</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- (C) Net Cost -->
+            <div class="net-cost-card">
+                <div class="net-title">NET OUT-OF-POCKET COST TO RESIDENT</div>
+                <div class="net-amount" id="net-cost-display">-</div>
+                <div class="net-subtitle">Total Paid – Total Refunded</div>
+            </div>
+
+            <!-- (D) Comparison -->
+            <div class="card comparison-card">
+                <h3>Monthly Value Comparison</h3>
+                <div class="chart-wrapper">
+                    <canvas id="residentChart"></canvas>
+                </div>
+                <div class="comparison-text">
+                    <p id="comp-text-home"></p>
+                    <p id="comp-text-other"></p>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Option</th>
+                            <th>Monthly Cost (₹)</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="highlight">
+                            <td>Mater Maria (Net Equiv.)</td>
+                            <td id="table-mater">-</td>
+                            <td>Based on chosen stay & type</td>
+                        </tr>
+                        <tr>
+                            <td>Home Nursing + Rent</td>
+                            <td id="table-home">-</td>
+                            <td>Market estimate</td>
+                        </tr>
+                        <tr>
+                            <td>Other Retirement Facility</td>
+                            <td id="table-other">-</td>
+                            <td>Market average</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- VIEW 2: INVESTORS -->
+        <div id="view-investors" class="view-section hidden">
+            <div class="card-header-title">Investor ROI Simulator</div>
+
+            <div class="investor-layout">
+                <!-- Left: Inputs -->
+                <div class="card inv-input-card">
+                    <h3>Investment Parameters</h3>
+                    <div class="form-group">
+                        <label>Investment Tier</label>
+                        <select id="investTier" class="form-control"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Holding Period: <span id="invYearsLabel">10 Years</span></label>
+                        <input type="range" id="invYears" min="1" max="30" value="10" class="slider">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Est. Annual Appreciation</label>
+                        <select id="appreciationRate" class="form-control">
+                            <option value="3">3% Conservative</option>
+                            <option value="5" selected>5% Moderate</option>
+                            <option value="7">7% Optimistic</option>
+                            <option value="10">10% Aggressive</option>
+                        </select>
+                    </div>
+
+                    <div class="info-box">
+                        <h4>How Refunds Work</h4>
+                        <p>Refund slabs (90% / 80% / 70%) apply ONLY to the refundable deposit portion. Share Capital
+                            grows independently at the chosen appreciation rate.</p>
+                    </div>
+                </div>
+
+                <!-- Right: Output -->
+                <div class="card inv-output-card">
+                    <h3>Projected Returns</h3>
+                    <table class="inv-table">
+                        <tr>
+                            <td>Total Initial Investment</td>
+                            <td id="inv-initial">-</td>
+                        </tr>
+                        <tr>
+                            <td>Future Share Value</td>
+                            <td id="inv-share-val">-</td>
+                        </tr>
+                        <tr>
+                            <td>Refundable Deposit Return</td>
+                            <td id="inv-deposit-ret">-</td>
+                        </tr>
+                        <tr class="bold-row">
+                            <td>Total Final Return</td>
+                            <td id="inv-final-ret">-</td>
+                        </tr>
+                        <tr>
+                            <td>Net Profit</td>
+                            <td id="inv-net-profit">-</td>
+                        </tr>
+                        <tr>
+                            <td>Approx. IRR</td>
+                            <td id="inv-irr">-</td>
+                        </tr>
+                    </table>
+
+                    <div class="chart-wrapper small">
+                        <canvas id="investorChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 3: COMPARISON -->
+        <div id="view-comparison" class="view-section hidden">
+            <div class="card-header-title">Quick Comparison Summary</div>
+
+            <div class="comp-toggle-container">
+                <label><input type="radio" name="compMode" value="resident" checked> Resident Scenario</label>
+                <label><input type="radio" name="compMode" value="investor"> Investor Scenario</label>
+            </div>
+
+            <div id="comp-res-content">
+                <!-- Reusing Resident Logic Display -->
+                <div class="info-box">
+                    <p>Switch to the <strong>Residents</strong> tab to customize inputs. This view shows a high-level
+                        summary of the current Resident configuration.</p>
+                </div>
+                <!-- We can clone or just show the same chart/net cost here for simplicity as requested -->
+                <div class="card">
+                    <h3>Resident Net Cost Summary</h3>
+                    <div class="big-stat" id="comp-res-net">-</div>
+                    <p>Net Out-of-Pocket Cost</p>
+                </div>
+            </div>
+
+            <div id="comp-inv-content" class="hidden">
+                <div class="info-box">
+                    <p>Switch to the <strong>Investors</strong> tab to customize inputs. This view shows a high-level
+                        summary of the current Investor configuration.</p>
+                </div>
+                <div class="card">
+                    <h3>Investor ROI Summary</h3>
+                    <div class="big-stat" id="comp-inv-return">-</div>
+                    <p>Total Final Return</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js?v=2"></script>
+</body>
+
+</html>
