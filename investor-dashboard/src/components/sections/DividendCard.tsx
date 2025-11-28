@@ -31,7 +31,6 @@ export const DividendCard: React.FC<DividendCardProps> = ({ breakdown }) => {
         setCalculatedTotal(total);
     }, [endYear, breakdown]);
 
-    const dividendRatePercent = (DIVIDEND_YIELD_ASSUMPTION * 100).toFixed(0);
 
     return (
         <Card className="bg-white border border-border p-6 mt-6 relative overflow-hidden">
@@ -50,10 +49,7 @@ export const DividendCard: React.FC<DividendCardProps> = ({ breakdown }) => {
                     {/* Tooltip */}
                     <div className="absolute right-0 top-6 w-64 bg-primary text-white text-xs p-3 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
                         <p className="leading-relaxed">
-                            Dividend income is projected only from {DIVIDEND_START_YEAR} onwards.
-                            Current rates are placeholders and will be finalised internally.
-                            Calculations assume 10% annual interest on investor deposit from FY 2027
-                            and a {dividendRatePercent}% payout on capital from {DIVIDEND_START_YEAR}.
+                            The sliders illustrate cumulative dividends based on total projected distributions reviewed by the CA. These figures are indicative and follow the financial model's total payout schedule, beginning from Year 6.
                         </p>
                     </div>
                 </div>

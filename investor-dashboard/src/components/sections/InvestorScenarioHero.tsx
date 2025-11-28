@@ -216,7 +216,7 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
                                 <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-3">
                                     <AlertTriangle size={16} className="text-red-400 mt-0.5 flex-shrink-0" />
                                     <p className="text-xs text-red-200/80 leading-relaxed">
-                                        <strong>Shutdown Mode:</strong> Assumes full refund to residents in Year 15 and liquidation of all assets (Land + Infrastructure WDV).
+                                        <strong>Shutdown Mode:</strong> Assumes Year 15 closure with full resident refunds and liquidation of financial assets. For illustration only.
                                     </p>
                                 </div>
                             )}
@@ -227,13 +227,13 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
                                     {formatCurrencyINR(mmValue)}
                                 </div>
                                 <div className="inline-flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full text-[10px] text-white/80 mb-8">
-                                    {isShutdown ? 'Based on Liquidation Value' : 'Based on 15-year conservative case'}
+                                    Based on consolidated investor return model
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-6 pt-6 border-t border-white/10">
                                     <div>
                                         <div className="text-white/60 text-xs font-medium mb-1">Target IRR</div>
-                                        <div className="text-2xl font-serif font-bold text-white">{irr}%</div>
+                                        <div className="text-2xl font-serif font-bold text-white">{irr.toFixed(2)}%</div>
                                     </div>
                                     <div>
                                         <div className="text-white/60 text-xs font-medium mb-1">Money Multiple</div>

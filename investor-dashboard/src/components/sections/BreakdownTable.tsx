@@ -18,7 +18,7 @@ export const BreakdownTable: React.FC<BreakdownTableProps> = ({ data }) => {
                         <tr>
                             <th className="px-4 py-3 sticky left-0 bg-offwhite z-10 border-r border-border">Year</th>
                             <th className="px-4 py-3 text-primary">Opening Value</th>
-                            <th className="px-4 py-3 text-accent">Deposit Interest<br /><span className="text-[10px] normal-case opacity-70">(10% from 2027)</span></th>
+                            <th className="px-4 py-3 text-accent">Fixed Return Component<br /><span className="text-[10px] normal-case opacity-70">(Illustrative)</span></th>
                             <th className="px-4 py-3 text-accent">Dividend<br /><span className="text-[10px] normal-case opacity-70">(from 2030)</span></th>
                             <th className="px-4 py-3 font-bold text-primary bg-primary/5">Closing Value<br />(Mater Maria)</th>
                             <th className="px-4 py-3 text-secondary/70">FD Value</th>
@@ -43,6 +43,11 @@ export const BreakdownTable: React.FC<BreakdownTableProps> = ({ data }) => {
                         ))}
                     </tbody>
                 </table>
+            </div>
+            <div className="p-3 bg-offwhite/30 border-t border-border">
+                <p className="text-xs text-secondary/60 leading-relaxed">
+                    <strong>Note:</strong> Closing Value (Mater Maria) represents the notional value of your equity compounding at 8.45% annually. Fixed return component and dividends are shown separately as cash distributions and are not deducted from this line.
+                </p>
             </div>
         </div>
     );
