@@ -1,24 +1,42 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '../ui/Card';
 import { formatCurrency } from '../../lib/utils';
 import { Minus, Plus, CheckCircle2, Download, AlertTriangle } from 'lucide-react';
 import { DividendCard } from './DividendCard';
 import { generateInvestorPDF } from '../../lib/pdfGenerator';
-import { calculateYearlyBreakdown, calculateInvestorMetrics, formatCurrencyINR } from '../../lib/financialModel';
-
-type PlanType = 'platinum' | 'gold' | 'silver';
+import {
+    calculateYearlyBreakdown,
+    formatCurrencyINR,
+    PLANS as MODEL_PLANS,
+    SCENARIOS,
+    PROJECT_IRR_BASE,
+    TOTAL_EQUITY_POOL,
+    RESIDENT_REFUND_LIABILITY,
+    FINANCIAL_ASSETS_YEAR15,
+    getTotalCommitment,
+    getTotalCashDistributions,
+    getResidualValue,
+    getEconomicValueYear15,
+    getMoneyMultiple,
+    getEquityStakePct,
+    getSafetyBufferShare,
+    getStrategicSaleProceeds,
+    getStrategicSaleTotalValue,
+    type PlanType,
+    type ScenarioId,
+    type SaleMultiple,
+} from '../../lib/financialModel';
 
 interface InvestorScenarioHeroProps {
     selectedPlan: PlanType;
     setSelectedPlan: (plan: PlanType) => void;
     lots: number;
     setLots: (lots: number) => void;
-    isShutdown: boolean;
-    setIsShutdown: (isShutdown: boolean) => void;
 }
 
-const PLANS = {
+// UI display data (privileges, schedules) - separate from calculation model
+const PLAN_UI_DATA = {
     platinum: {
         name: 'Founding Partner', tier: 'Platinum', price: 3000000, color: '#103B32', accent: '#CBA35C',
         privileges: [
@@ -74,20 +92,52 @@ const PLANS = {
 
 export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
     selectedPlan, setSelectedPlan,
-    lots, setLots,
-    isShutdown, setIsShutdown
+    lots, setLots
 }) => {
-    const plan = PLANS[selectedPlan];
-    const totalInvestment = plan.price * lots;
+    // Scenario state (replaces isShutdown)
+    const [scenario, setScenario] = useState<ScenarioId>('base');
+    const [saleMultiple, setSaleMultiple] = useState<SaleMultiple>('10x');
 
-    // Calculate Metrics using new model
-    const metrics = calculateInvestorMetrics(selectedPlan, lots);
-    const mmValue = metrics.year15Value;  // Year 15 value from model
-    const irr = metrics.approxAnnualReturnEconomic * 100;  // Convert to percentage (8.45%)
-    const multiple = metrics.economicMultiple;  // ~3.38x
+    const planUI = PLAN_UI_DATA[selectedPlan];
+    const planModel = MODEL_PLANS[selectedPlan];
+
+    // Calculate scenario-aware metrics
+    const totalCommitment = getTotalCommitment(planModel, lots);
+    const equityStakePct = getEquityStakePct(planModel, lots);
+    const totalCashDistributions = getTotalCashDistributions(planModel, lots);
+    const residualValue = getResidualValue(planModel, lots);
+
+    // Scenario-specific calculations
+    let roiYear15: number;
+    let irrDisplay: string;
+    let moneyMultiple: number;
+    let chipText: string;
+
+    if (scenario === 'base') {
+        // Base Case: CA-reviewed model
+        roiYear15 = getEconomicValueYear15(planModel, lots);
+        irrDisplay = (PROJECT_IRR_BASE * 100).toFixed(2) + '%';  // 9.43%
+        moneyMultiple = getMoneyMultiple(planModel, lots);
+        chipText = 'Based on CA-reviewed investor return model';
+
+    } else if (scenario === 'shutdown') {
+        // Shutdown: Only safety buffer share
+        roiYear15 = getSafetyBufferShare(planModel, lots);
+        irrDisplay = 'Negative (partial capital recovery)';
+        moneyMultiple = roiYear15 / totalCommitment;
+        chipText = 'Based on liquidation surplus after full resident refunds';
+
+    } else {
+        // Strategic Sale: Cash + sale proceeds
+        roiYear15 = getStrategicSaleTotalValue(planModel, lots, saleMultiple);
+        irrDisplay = '~10–12%';  // Illustrative range
+        moneyMultiple = roiYear15 / totalCommitment;
+        chipText = 'Based on assumed strategic exit valuation';
+    }
 
     // Calculate Dividends for Card
-    const breakdown = calculateYearlyBreakdown(totalInvestment, selectedPlan, lots, isShutdown);
+    const totalInvestment = totalCommitment; // For backward compatibility
+    const breakdown = calculateYearlyBreakdown(totalInvestment, selectedPlan, lots, false);
     const totalDividends = breakdown.reduce((sum, row) => sum + row.dividend, 0);
     const avgAnnualDividend = totalDividends / 15;
     const returnPercentage = (totalDividends / totalInvestment) * 100;
@@ -95,20 +145,20 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
 
     const handleDownloadPDF = () => {
         generateInvestorPDF({
-            planName: plan.name,
+            planName: planUI.name,
             lots,
-            totalCommitment: totalInvestment,
-            ownershipPercentage: (totalInvestment / 200000000) * 100,
-            isShutdown,
-            roiYear15: mmValue,
-            irr,
-            multiple,
-            schedule: plan.schedule,
+            totalCommitment,
+            ownershipPercentage: equityStakePct,
+            isShutdown: scenario === 'shutdown',
+            roiYear15,
+            irr: irrDisplay,
+            multiple: moneyMultiple,
+            schedule: planUI.schedule,
             breakdown,
             totalDepositInterest,
             totalDividends,
-            privileges: plan.privileges,
-            exitRule: plan.exitRule
+            privileges: planUI.privileges,
+            exitRule: planUI.exitRule
         });
     };
 
@@ -138,23 +188,27 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
 
                         {/* Plan Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {(Object.keys(PLANS) as PlanType[]).map((key) => (
+                            {(Object.keys(PLAN_UI_DATA) as PlanType[]).map((planKey) => (
                                 <div
-                                    key={key}
-                                    onClick={() => setSelectedPlan(key)}
-                                    className={`cursor-pointer relative p-6 rounded-xl border transition-all duration-300 ${selectedPlan === key
-                                        ? 'bg-white/10 border-accent shadow-xl transform scale-105'
+                                    key={planKey}
+                                    onClick={() => setSelectedPlan(planKey)}
+                                    className={`cursor-pointer relative p-6 rounded-xl border transition-all duration-300 ${selectedPlan === planKey
+                                        ? 'shadow-xl transform scale-105'
                                         : 'bg-white/5 border-white/10 hover:bg-white/10'
                                         }`}
+                                    style={{
+                                        backgroundColor: selectedPlan === planKey ? PLAN_UI_DATA[planKey].color : undefined,
+                                        borderColor: selectedPlan === planKey ? PLAN_UI_DATA[planKey].accent : 'rgba(255, 255, 255, 0.1)'
+                                    }}
                                 >
-                                    {selectedPlan === key && (
+                                    {selectedPlan === planKey && (
                                         <div className="absolute -top-3 -right-3 bg-accent text-primary p-1 rounded-full">
                                             <CheckCircle2 size={20} />
                                         </div>
                                     )}
-                                    <div className="text-xs font-bold uppercase tracking-wider text-white/60 mb-2">{PLANS[key].tier}</div>
-                                    <div className="text-xl font-serif font-bold text-white mb-1">{PLANS[key].name}</div>
-                                    <div className="text-accent font-bold">{formatCurrency(PLANS[key].price)}</div>
+                                    <div className="text-xs uppercase tracking-wider opacity-70">{PLAN_UI_DATA[planKey].tier}</div>
+                                    <div className="font-serif font-bold text-lg">{PLAN_UI_DATA[planKey].name}</div>
+                                    <div className="font-bold">{formatCurrency(PLAN_UI_DATA[planKey].price)}</div>
                                     <div className="text-[10px] text-white/40 mt-1">per unit</div>
                                 </div>
                             ))}
@@ -189,20 +243,26 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
                         <Card className="bg-white/5 border-white/10 backdrop-blur-sm p-8 relative overflow-hidden">
                             {/* Toggle & Download */}
                             <div className="flex justify-between items-start mb-6">
-                                <div className="flex items-center bg-black/30 rounded-full p-1 border border-white/10">
-                                    <button
-                                        onClick={() => setIsShutdown(false)}
-                                        className={`px-3 py-1 rounded-full text-[10px] font-bold transition-colors ${!isShutdown ? 'bg-accent text-primary' : 'text-white/60 hover:text-white'}`}
-                                    >
-                                        Normal Case
-                                    </button>
-                                    <button
-                                        onClick={() => setIsShutdown(true)}
-                                        className={`px-3 py-1 rounded-full text-[10px] font-bold transition-colors ${isShutdown ? 'bg-red-500/80 text-white' : 'text-white/60 hover:text-white'}`}
-                                    >
-                                        Shutdown (Yr 15)
-                                    </button>
+                                {/* Scenario Selector */}
+                                <div className="flex gap-2 mb-6">
+                                    {SCENARIOS.map((scenarioOption) => (
+                                        <button
+                                            key={scenarioOption.id}
+                                            onClick={() => setScenario(scenarioOption.id)}
+                                            className={`flex-1 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200 ${scenario === scenarioOption.id
+                                                ? scenarioOption.badgeColor === 'danger'
+                                                    ? 'bg-red-500 text-white shadow-lg'
+                                                    : scenarioOption.badgeColor === 'accent'
+                                                        ? 'bg-accent text-primary shadow-lg'
+                                                        : 'bg-primary text-white shadow-lg'
+                                                : 'bg-white/10 text-white/60 hover:bg-white/20'
+                                                }`}
+                                        >
+                                            {scenarioOption.label}
+                                        </button>
+                                    ))}
                                 </div>
+
                                 <button
                                     onClick={handleDownloadPDF}
                                     className="flex items-center gap-2 text-accent hover:text-white transition-colors text-xs font-bold uppercase tracking-wider"
@@ -212,7 +272,7 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
                                 </button>
                             </div>
 
-                            {isShutdown && (
+                            {scenario === 'shutdown' && (
                                 <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-3">
                                     <AlertTriangle size={16} className="text-red-400 mt-0.5 flex-shrink-0" />
                                     <p className="text-xs text-red-200/80 leading-relaxed">
@@ -224,29 +284,29 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
                             <div className="relative z-10">
                                 <div className="text-white/60 text-sm font-medium mb-2">ROI at Year 15</div>
                                 <div className="text-4xl lg:text-5xl font-serif font-bold text-accent mb-2">
-                                    {formatCurrencyINR(mmValue)}
+                                    {formatCurrencyINR(roiYear15)}
                                 </div>
                                 <div className="inline-flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full text-[10px] text-white/80 mb-8">
-                                    Based on consolidated investor return model
+                                    {chipText}
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-6 pt-6 border-t border-white/10">
                                     <div>
                                         <div className="text-white/60 text-xs font-medium mb-1">Target IRR</div>
-                                        <div className="text-2xl font-serif font-bold text-white">{irr.toFixed(2)}%</div>
+                                        <div className="text-2xl font-serif font-bold text-white">{irrDisplay}</div>
                                     </div>
                                     <div>
                                         <div className="text-white/60 text-xs font-medium mb-1">Money Multiple</div>
-                                        <div className="text-2xl font-serif font-bold text-white">{multiple.toFixed(2)}x</div>
+                                        <div className="text-2xl font-serif font-bold text-white">{moneyMultiple.toFixed(2)}x</div>
                                     </div>
                                 </div>
 
                                 <div className="mt-6 pt-4 border-t border-white/10 flex justify-between items-end">
                                     <div>
                                         <div className="text-white/40 text-[10px] uppercase tracking-wider mb-1">Total Commitment</div>
-                                        <div className="text-lg font-bold text-white">{formatCurrencyINR(totalInvestment)}</div>
+                                        <div className="text-lg font-bold text-white">{formatCurrencyINR(totalCommitment)}</div>
                                         <div className="text-accent text-[10px] font-medium mt-1">
-                                            Ownership in Project: {((totalInvestment / 200000000) * 100).toFixed(2)}% of total equity pool
+                                            Ownership in Project: {equityStakePct.toFixed(2)}% of total equity pool
                                         </div>
                                     </div>
                                 </div>

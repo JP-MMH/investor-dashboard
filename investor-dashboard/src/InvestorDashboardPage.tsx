@@ -24,7 +24,6 @@ export const InvestorDashboardPage: React.FC = () => {
     // Global State for the Tier-Based Selector
     const [selectedPlan, setSelectedPlan] = useState<PlanType>('platinum');
     const [lots, setLots] = useState(1);
-    const [isShutdown, setIsShutdown] = useState(false);
 
     const totalInvestment = PLANS[selectedPlan] * lots;
 
@@ -36,7 +35,6 @@ export const InvestorDashboardPage: React.FC = () => {
                 <InvestorScenarioHero
                     selectedPlan={selectedPlan} setSelectedPlan={setSelectedPlan}
                     lots={lots} setLots={setLots}
-                    isShutdown={isShutdown} setIsShutdown={setIsShutdown}
                 />
 
                 <PlanDetailsSection selectedPlan={selectedPlan} lots={lots} />
@@ -45,7 +43,7 @@ export const InvestorDashboardPage: React.FC = () => {
 
                 <RefundSafetySection amount={totalInvestment} />
 
-                <ComparisonSection amount={totalInvestment} selectedPlan={selectedPlan} isShutdown={isShutdown} lots={lots} />
+                <ComparisonSection amount={totalInvestment} selectedPlan={selectedPlan} isShutdown={false} lots={lots} />
 
                 <OccupancySensitivitySection />
 

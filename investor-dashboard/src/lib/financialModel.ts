@@ -8,54 +8,70 @@
 // ============================================================================
 
 export type PlanType = 'platinum' | 'gold' | 'silver';
+export type PlanId = PlanType;  // Alias for consistency
+
+// Scenario types
+export type ScenarioId = 'base' | 'shutdown' | 'strategicSale';
+export type SaleMultiple = '8x' | '10x' | '12x';
 
 export interface Plan {
     id: string;
     label: string;
-    unitInvestment: number;      // Investment per lot
-    roi15: number;               // Value at year 15 (compounded at 8.45%)
-    interestTotal: number;       // Total interest over 15 years
-    dividendTotal: number;       // Total dividends over 15 years
-    profitShareTotal: number;    // Total profit share over 15 years
-    residualValue: number;       // Remaining value in company at Y15
-    years: number;               // Investment horizon
-    assumedRate: number;         // Annual compound rate (8.45%)
+    unitInvestment: number;       // ₹ per unit
+    equitySharePct: number;       // % of total equity per 1 unit
+    finalValueYear15: number;     // compounded at 8.45% for 15 yrs
+    interestTotal: number;        // total interest over 15 yrs
+    dividendsTotal: number;       // total dividends over 15 yrs (renamed from dividendTotal)
+    profitShareTotal: number;     // total profit share over 15 yrs
+    residualValue: number;        // residual stake at Yr 15
+    years: number;                // Investment horizon (15)
+    assumedRate: number;          // Annual compound rate (8.45%)
+}
+
+export interface ScenarioConfig {
+    id: ScenarioId;
+    label: string;
+    badgeColor?: 'default' | 'danger' | 'accent';
+    description: string;
 }
 
 export const PLANS: Record<PlanType, Plan> = {
     platinum: {
         id: "platinum",
         label: "Platinum – Founding Partner",
-        unitInvestment: 3000000,      // ₹30,00,000 per lot
-        roi15: 10128955,              // ₹1,01,28,955 at year 15
-        interestTotal: 400000,        // ₹4,00,000 total interest
-        dividendTotal: 4170000,       // ₹41,70,000 total dividends
-        profitShareTotal: 4570000,    // ₹45,70,000 total profit share
-        residualValue: 2558955,       // ₹25,58,955 residual
+        unitInvestment: 3000000,       // ₹30,00,000 per lot
+        equitySharePct: 1.5,           // 1.5% of equity pool per unit
+        finalValueYear15: 10128955,    // ₹1,01,28,955 at year 15 (8.45% compound)
+        interestTotal: 400000,         // ₹4,00,000 total interest
+        dividendsTotal: 4170000,       // ₹41,70,000 total dividends
+        profitShareTotal: 4570000,     // ₹45,70,000 total profit share
+        residualValue: 2558955,        // ₹25,58,955 residual
         years: 15,
-        assumedRate: 0.0845          // 8.45% p.a.
+        assumedRate: 0.0845           // 8.45% p.a.
     },
     gold: {
         id: "gold",
         label: "Gold – Core Investor",
-        unitInvestment: 2000000,      // ₹20,00,000
-        roi15: 6752636,               // ₹67,52,636
-        interestTotal: 200000,        // ₹2,00,000
-        dividendTotal: 2780000,       // ₹27,80,000
-        profitShareTotal: 2980000,    // ₹29,80,000
-        residualValue: 1772636,       // ₹17,72,636
+        unitInvestment: 2000000,       // ₹20,00,000
+        equitySharePct: 1.0,           // 1.0% of equity pool per unit
+        finalValueYear15: 6752636,     // ₹67,52,636
+        interestTotal: 200000,         // ₹2,00,000
+        dividendsTotal: 2780000,       // ₹27,80,000
+        profitShareTotal: 2980000,     // ₹29,80,000
+        residualValue: 1772636,        // ₹17,72,636
         years: 15,
         assumedRate: 0.0845
     },
     silver: {
         id: "silver",
         label: "Silver – Early Contributor",
-        unitInvestment: 1000000,      // ₹10,00,000
-        roi15: 3376318,               // ₹33,76,318
-        interestTotal: 100000,        // ₹1,00,000
-        dividendTotal: 1390000,       // ₹13,90,000
-        profitShareTotal: 1490000,    // ₹14,90,000
-        residualValue: 886318,        // ₹8,86,318
+        unitInvestment: 1000000,       // ₹10,00,000
+        equitySharePct: 0.5,           // 0.5% of equity pool per unit
+        finalValueYear15: 3376318,     // ₹33,76,318
+        interestTotal: 100000,         // ₹1,00,000
+        dividendsTotal: 1390000,       // ₹13,90,000
+        profitShareTotal: 1490000,     // ₹14,90,000
+        residualValue: 886318,         // ₹8,86,318
         years: 15,
         assumedRate: 0.0845
     }
@@ -65,9 +81,16 @@ export const PLANS: Record<PlanType, Plan> = {
 // PROJECT-LEVEL CONSTANTS
 // ============================================================================
 
-export const EQUITY_POOL = 2000000000;              // ₹20 Cr total equity
-export const RESIDENT_REFUND_OBLIGATION = 6138000000; // ₹61.38 Cr
-export const FINANCIAL_ASSETS_AT_15 = 6712000000;     // ₹67.12 Cr (FD + MF + cash)
+export const TOTAL_EQUITY_POOL = 2000000000;              // ₹20 Cr total equity pool
+export const SURPLUS_AFTER_RESIDENT_REFUNDS = 57300000;   // ₹5.73 Cr surplus
+export const RESIDENT_REFUND_LIABILITY = 6139000000;      // ₹61.39 Cr
+export const FINANCIAL_ASSETS_YEAR15 = 6712000000;        // ₹67.12 Cr (FD + MF + cash)
+export const PROJECT_IRR_BASE = 0.0943;                   // 9.43% base case IRR
+
+// Legacy aliases for backward compatibility
+export const EQUITY_POOL = TOTAL_EQUITY_POOL;
+export const RESIDENT_REFUND_OBLIGATION = RESIDENT_REFUND_LIABILITY;
+export const FINANCIAL_ASSETS_AT_15 = FINANCIAL_ASSETS_YEAR15;
 
 // Comparison rates for other instruments
 export const COMPARISON_RATES = {
@@ -85,6 +108,31 @@ export const ALLOCATION = {
 };
 
 // ============================================================================
+// SCENARIO CONFIGURATION
+// ============================================================================
+
+export const SCENARIOS: ScenarioConfig[] = [
+    {
+        id: 'base',
+        label: 'Base Case',
+        badgeColor: 'default',
+        description: 'Project runs as planned for 15 years with CA-reviewed occupancy, returns and distributions.'
+    },
+    {
+        id: 'shutdown',
+        label: 'Shutdown (Yr 15)',
+        badgeColor: 'danger',
+        description: 'Year 15 closure with full resident refunds and liquidation of financial assets at book value.'
+    },
+    {
+        id: 'strategicSale',
+        label: 'Strategic Sale (Yr 15)',
+        badgeColor: 'accent',
+        description: 'Year 15 sale of the operating company to a strategic buyer at an EBITDA / asset-based multiple.'
+    }
+];
+
+// ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
@@ -95,6 +143,87 @@ export const ALLOCATION = {
  */
 export function formatCurrencyINR(value: number): string {
     return "₹" + Math.round(value).toLocaleString("en-IN");
+}
+
+/**
+ * Get total commitment for given plan and lots
+ */
+export function getTotalCommitment(plan: Plan, lots: number): number {
+    return plan.unitInvestment * lots;
+}
+
+/**
+ * Get total cash distributions (interest + dividends + profit share)
+ */
+export function getTotalCashDistributions(plan: Plan, lots: number): number {
+    return (plan.interestTotal + plan.dividendsTotal + plan.profitShareTotal) * lots;
+}
+
+/**
+ * Get residual stake value at Year 15
+ */
+export function getResidualValue(plan: Plan, lots: number): number {
+    return plan.residualValue * lots;
+}
+
+/**
+ * Get economic value at Year 15 (cash + residual)
+ */
+export function getEconomicValueYear15(plan: Plan, lots: number): number {
+    return getTotalCashDistributions(plan, lots) + getResidualValue(plan, lots);
+}
+
+/**
+ * Get money multiple (total economic value / initial investment)
+ */
+export function getMoneyMultiple(plan: Plan, lots: number): number {
+    const invested = getTotalCommitment(plan, lots);
+    const totalValue = getEconomicValueYear15(plan, lots);
+    return totalValue / invested;
+}
+
+/**
+ * Get equity stake percentage in project
+ */
+export function getEquityStakePct(plan: Plan, lots: number): number {
+    return plan.equitySharePct * lots;
+}
+
+/**
+ * Get investor's share of safety buffer (₹5.73 Cr surplus) in shutdown scenario
+ * This is the investor's proportional share of surplus after resident refunds
+ */
+export function getSafetyBufferShare(plan: Plan, lots: number): number {
+    const equityForThisInvestor = getTotalCommitment(plan, lots);
+    const ratio = SURPLUS_AFTER_RESIDENT_REFUNDS / TOTAL_EQUITY_POOL;
+    return equityForThisInvestor * ratio;
+}
+
+/**
+ * Get strategic sale proceeds for investor
+ * @param plan Selected plan
+ * @param lots Number of lots
+ * @param saleMultiple Sale multiple (8x, 10x, 12x)
+ * @returns Sale proceeds for this investor
+ */
+export function getStrategicSaleProceeds(plan: Plan, lots: number, saleMultiple: SaleMultiple): number {
+    // Assumed equity valuations at sale
+    const equityValueAtSale =
+        saleMultiple === '8x' ? 600000000 :   // ₹60 Cr
+            saleMultiple === '10x' ? 800000000 :  // ₹80 Cr
+                1000000000;                           // ₹100 Cr (12x)
+
+    const equityStakePct = getEquityStakePct(plan, lots);
+    return equityValueAtSale * (equityStakePct / 100);
+}
+
+/**
+ * Get total value in strategic sale scenario (cash distributions + sale proceeds)
+ */
+export function getStrategicSaleTotalValue(plan: Plan, lots: number, saleMultiple: SaleMultiple): number {
+    const cashDistributions = getTotalCashDistributions(plan, lots);
+    const saleProceeds = getStrategicSaleProceeds(plan, lots, saleMultiple);
+    return cashDistributions + saleProceeds;
 }
 
 /**
@@ -109,7 +238,7 @@ export function buildDividendSchedule(plan: Plan): number[] {
 
     const startYear = 6;
     const dividendYears = years - startYear + 1; // 10 years (6-15)
-    const perYear = plan.dividendTotal / dividendYears;
+    const perYear = plan.dividendsTotal / dividendYears;
 
     for (let y = startYear; y <= years; y++) {
         schedule[y - 1] = perYear;
@@ -134,7 +263,7 @@ export interface InvestorMetrics {
     initialInvestment: number;
     year15Value: number;
     interestTotal: number;
-    dividendTotal: number;
+    dividendsTotal: number;
     profitShareTotal: number;
     totalCashReceived: number;
     residualValue: number;
@@ -160,11 +289,11 @@ export function calculateInvestorMetrics(
     const initialInvestment = plan.unitInvestment * units;
 
     // Notional value of share capital at year 15 (compounded at 8.45%)
-    const year15Value = plan.roi15 * units;
+    const year15Value = plan.finalValueYear15 * units;
 
     // Cash flows over 15 years
     const interestTotal = plan.interestTotal * units;
-    const dividendTotal = plan.dividendTotal * units;
+    const dividendTotal = plan.dividendsTotal * units;
     const profitShareTotal = plan.profitShareTotal * units;
 
     const totalCashReceived = interestTotal + dividendTotal + profitShareTotal;
@@ -186,7 +315,7 @@ export function calculateInvestorMetrics(
         initialInvestment,
         year15Value,
         interestTotal,
-        dividendTotal,
+        dividendsTotal: dividendTotal,
         profitShareTotal,
         totalCashReceived,
         residualValue,
@@ -374,7 +503,7 @@ export const getInvestorMetrics = (plan: PlanType, lots: number) => {
 
     return {
         totalInvested: metrics.initialInvestment,
-        totalDividends: metrics.dividendTotal,
+        totalDividends: metrics.dividendsTotal,
         totalInterest: metrics.interestTotal,
         totalCashDuringTerm: metrics.totalCashReceived,
         netWorthAtYear15: metrics.year15Value,

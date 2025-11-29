@@ -3,10 +3,6 @@ import { Card } from '../ui/Card';
 import { formatCurrency } from '../../lib/utils';
 import { Info } from 'lucide-react';
 
-// Local constants for DividendCard (not part of CA plan requirements)
-const DIVIDEND_START_YEAR = 2030;
-const DIVIDEND_YIELD_ASSUMPTION = 0.04; // 4% placeholder
-
 interface DividendCardProps {
     totalDividends: number; // This might need to be recalculated based on slider
     avgAnnualDividend: number;
@@ -18,15 +14,15 @@ export const DividendCard: React.FC<DividendCardProps> = ({ breakdown }) => {
     const [endYear, setEndYear] = useState(15);
     const [calculatedTotal, setCalculatedTotal] = useState(0);
 
-    // Find the index where dividends start
-    const startYearIndex = breakdown.findIndex(row => row.year >= DIVIDEND_START_YEAR);
-    const maxYear = 15; // Fixed tenure
-    const minYear = breakdown[startYearIndex]?.yearIndex || 10; // Approx year index for 2030
+    // Slider range: Year 6 to Year 15 (where dividends are paid)
+    const minYear = 6;
+    const maxYear = 15;
 
     useEffect(() => {
         // Calculate total dividends up to the selected end year
+        // Filter by year (not yearIndex) and sum dividends
         const total = breakdown
-            .filter(row => row.yearIndex <= endYear)
+            .filter(row => row.year >= 6 && row.year <= endYear)
             .reduce((sum, row) => sum + row.dividend, 0);
         setCalculatedTotal(total);
     }, [endYear, breakdown]);
@@ -40,7 +36,7 @@ export const DividendCard: React.FC<DividendCardProps> = ({ breakdown }) => {
                         Projected Dividend Income
                     </div>
                     <div className="text-xs text-secondary/40">
-                        From {DIVIDEND_START_YEAR} to Year {endYear}
+                        From Year 6 to Year {endYear}
                     </div>
                 </div>
                 <div className="group relative">
@@ -79,7 +75,7 @@ export const DividendCard: React.FC<DividendCardProps> = ({ breakdown }) => {
                     className="w-full h-2 bg-offwhite rounded-lg appearance-none cursor-pointer accent-accent"
                 />
                 <div className="flex justify-between text-[10px] text-secondary/40 mt-1">
-                    <span>{DIVIDEND_START_YEAR}</span>
+                    <span>Year 6</span>
                     <span>Year 15</span>
                 </div>
             </div>

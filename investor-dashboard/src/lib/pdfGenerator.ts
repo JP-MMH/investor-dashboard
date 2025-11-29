@@ -10,7 +10,7 @@ interface PDFData {
     ownershipPercentage: number;
     isShutdown: boolean;
     roiYear15: number;
-    irr: number;
+    irr: string;  // Can be percentage string, range, or "Negative"
     multiple: number;
     schedule: any[];
     breakdown: YearlyBreakdownRow[];
@@ -59,7 +59,7 @@ export const generateInvestorPDF = (data: PDFData) => {
         ['Total Commitment', formatCurrency(data.totalCommitment)],
         ['Ownership in Project', `${data.ownershipPercentage.toFixed(4)}%`],
         ['Projected Value (Year 15)', formatCurrency(data.roiYear15)],
-        ['Target IRR', `${data.irr}%`],
+        ['Target IRR', data.irr],
         ['Money Multiple', `${data.multiple.toFixed(2)}x`],
         ['Scenario Mode', data.isShutdown ? 'Shutdown (Liquidation)' : 'Normal (Going Concern)']
     ];
