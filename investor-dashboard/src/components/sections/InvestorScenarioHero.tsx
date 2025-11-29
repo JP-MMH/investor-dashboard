@@ -255,6 +255,36 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
                                     ))}
                                 </div>
 
+                                {/* Strategic Sale Multiple Selector (conditionally visible) */}
+                                {scenario === 'strategicSale' && (
+                                    <div className="mb-6 p-4 bg-accent/10 border border-accent/30 rounded-lg">
+                                        <div className="text-xs text-accent font-bold uppercase tracking-wider mb-3">
+                                            Exit Valuation Multiple
+                                        </div>
+                                        <div className="flex gap-2 mb-3">
+                                            {(['8x', '10x', '12x'] as SaleMultiple[]).map((multiple) => (
+                                                <button
+                                                    key={multiple}
+                                                    onClick={() => {
+                                                        // Note: Currently saleMultiple is not stateful
+                                                        // This will be functional when we add state back
+                                                    }}
+                                                    className={`flex-1 px-3 py-2 rounded text-sm font-bold transition-all ${saleMultiple === multiple
+                                                        ? 'bg-accent text-primary shadow-md'
+                                                        : 'bg-white/10 text-white/70 hover:bg-white/20'
+                                                        }`}
+                                                >
+                                                    {multiple}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <div className="text-xs text-white/60 leading-relaxed italic">
+                                            Strategic sale outcomes are illustrative ranges based on assumed exit valuations (not CA-certified).
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Shutdown Warning Banner (conditionally visible) */}
                                 <button
                                     onClick={handleDownloadPDF}
                                     className="flex items-center gap-2 text-accent hover:text-white transition-colors text-xs font-bold uppercase tracking-wider"
@@ -299,6 +329,53 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
                                         <div className="text-lg font-bold text-white">{formatCurrencyINR(totalCommitment)}</div>
                                         <div className="text-accent text-[10px] font-medium mt-1">
                                             Ownership in Project: {equityStakePct.toFixed(2)}% of total equity pool
+                                        </div>
+                                    </div>
+
+                                    {/* Download Button */}
+                                    <button
+                                        onClick={handleDownloadPDF}
+                                        className="flex items-center gap-2 text-accent hover:text-white transition-colors text-xs font-bold"
+                                    >
+                                        <Download size={14} />
+                                        <span className="text-[10px] uppercase tracking-wider">PDF</span>
+                                    </button>
+                                </div>
+
+                                {/* Enhanced Metrics (CA-Grade) */}
+                                <div className="mt-4 pt-4 border-t border-white/10 space-y-3 text-xs">
+                                    {/* Total Cash Distributions */}
+                                    <div className="flex justify-between items-center">
+                                        <div className="text-white/60">Total Cash Distributed (15 yrs)</div>
+                                        <div className="text-white font-bold">
+                                            {formatCurrencyINR((planModel.interestTotal + planModel.dividendsTotal + planModel.profitShareTotal) * lots)}
+                                        </div>
+                                    </div>
+
+                                    {/* Residual Value (hide in shutdown) */}
+                                    {scenario !== 'shutdown' && (
+                                        <div className="flex justify-between items-center">
+                                            <div className="text-white/60">Residual Stake Value (Yr 15)</div>
+                                            <div className="text-white font-bold">
+                                                {formatCurrencyINR(planModel.residualValue * lots)}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Safety Buffer Share (emphasize in shutdown) */}
+                                    <div className={`flex justify-between items-center p-2 rounded ${scenario === 'shutdown' ? 'bg-red-500/10 border border-red-500/20' : ''}`}>
+                                        <div className={scenario === 'shutdown' ? 'text-red-300 font-bold' : 'text-white/40 text-[10px]'}>
+                                            {scenario === 'shutdown' ? 'Your Share of Safety Surplus' : 'Safety Buffer (if liquidated)'}
+                                        </div>
+                                        <div className={scenario === 'shutdown' ? 'text-red-200 font-bold' : 'text-white/40'}>
+                                            {formatCurrencyINR(getSafetyBufferShare(planModel, lots))}
+                                        </div>
+                                    </div>
+
+                                    {/* Coverage Ratio (footer note) */}
+                                    <div className="pt-2 mt-2 border-t border-white/5">
+                                        <div className="text-white/40 text-[10px] leading-relaxed">
+                                            <strong className="text-white/60">Resident refund coverage at Year 15:</strong> ₹67.12 Cr assets vs ₹61.39 Cr liabilities (Coverage ratio: 1.09×)
                                         </div>
                                     </div>
                                 </div>
