@@ -7,24 +7,29 @@ export default {
     theme: {
         extend: {
             colors: {
-                // Strict Brand Palette - Mater Maria Homes
-                heritage: '#2F4F4F',    // Deep Heritage Green - trust, stability, heritage
-                cloud: '#FAF7F0',       // Cloud Off-White - softness, safety, warmth
-                terra: '#A65F43',       // Terracotta Accent - earth, groundedness, warmth
-                sage: '#6E8D5E',        // Sage Green - health, nature, calm progress
-                deepbrown: '#5C4033',   // Deep Brown - sturdiness, reliability
-                gold: '#D4AF37',        // Gold Accent - premium, value, reward
-                maroon: '#8B3A3A',      // Warm Maroon - caution without fear
-                coolgrey: '#A0A9AB',    // Cool Grey - technical, rational
+                // === INVESTOR VERTICAL - Palette 1: Spiritual depth, trust, night-time calmness ===
+                'mmh-investor-blue': '#102333',  // Midnight Blue - Primary for investor pages
+                'mmh-gold': '#D4B66A',           // Gold - Highlights and accents
+                'mmh-ivory': '#F5F2E8',          // Ivory - Background
+                'mmh-charcoal': '#1A1A1A',       // Charcoal - Dark text
 
-                // Legacy colors (keep for Investor page compatibility)
-                primary: "#103B32",
-                secondary: "#153F35",
-                accent: "#CBA35C",
-                highlight: "#E8D3A3",
-                offwhite: "#F8F4EC",
-                border: "#E0DED7",
-                risk: "#B9373C",
+                // === RESIDENT/LIVING VERTICAL - Separate palette (DO NOT USE for investors) ===
+                heritage: '#2F4F4F',             // Deep Heritage Green - LIVING pages only
+                cloud: '#FAF7F0',                // Cloud Off-White
+                terra: '#A65F43',                // Terracotta Accent
+                sage: '#6E8D5E',                 // Sage Green
+                deepbrown: '#5C4033',            // Deep Brown
+                maroon: '#8B3A3A',               // Warm Maroon
+                coolgrey: '#A0A9AB',             // Cool Grey
+
+                // === LEGACY ALIASES (Updated to Investor palette) ===
+                primary: "#102333",              // Midnight Blue (was green)
+                secondary: "#0D1B26",            // Darker Midnight Blue
+                accent: "#D4B66A",               // Gold (updated from #CBA35C)
+                highlight: "#E8D9B4",            // Light Gold
+                offwhite: "#F5F2E8",             // Ivory
+                border: "#E0DED7",               // Keep border
+                risk: "#B9373C",                 // Keep risk color
             },
             fontFamily: {
                 heading: ['Playfair Display', 'serif'],

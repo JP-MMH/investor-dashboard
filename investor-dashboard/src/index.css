@@ -6,26 +6,26 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Investor Brand Colors - Palette 1 */
+    --mmh-investor-blue: #102333;
+    --mmh-gold: #D4B66A;
+    --mmh-ivory: #F5F2E8;
+    --mmh-charcoal: #1A1A1A;
+  }
+
   html {
     scroll-behavior: smooth;
   }
 
   body {
-    background: #FAF7F0;
-    /* Cloud Off-White */
-    color: #5C4033;
-    /* Deep Brown */
+    background: #F5F2E8; /* Ivory background for investor pages */
+    color: #1A1A1A; /* Charcoal text */
     @apply font-sans antialiased;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    color: #2F4F4F;
-    /* Deep Heritage Green */
+  h1, h2, h3, h4, h5, h6 {
+    color: #102333; /* Midnight Blue headings */
     @apply font-serif;
   }
 }

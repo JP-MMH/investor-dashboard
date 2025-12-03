@@ -119,12 +119,6 @@ export const SCENARIOS: ScenarioConfig[] = [
         description: 'Project runs as planned for 15 years with CA-reviewed occupancy, returns and distributions.'
     },
     {
-        id: 'shutdown',
-        label: 'Shutdown (Yr 15)',
-        badgeColor: 'danger',
-        description: 'Year 15 closure with full resident refunds and liquidation of financial assets at book value.'
-    },
-    {
         id: 'strategicSale',
         label: 'Strategic Sale (Yr 15)',
         badgeColor: 'accent',

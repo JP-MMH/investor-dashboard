@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '../ui/Card';
 import { formatCurrency } from '../../lib/utils';
-import { Minus, Plus, CheckCircle2, Download, AlertTriangle } from 'lucide-react';
+import { Minus, Plus, CheckCircle2, Download } from 'lucide-react';
 import { DividendCard } from './DividendCard';
 import { generateInvestorPDF } from '../../lib/pdfGenerator';
 import {
@@ -32,7 +32,7 @@ interface InvestorScenarioHeroProps {
 // UI display data (privileges, schedules) - separate from calculation model
 const PLAN_UI_DATA = {
     platinum: {
-        name: 'Founding Partner', tier: 'Platinum', price: 3000000, color: '#103B32', accent: '#CBA35C',
+        name: 'Founding Partner', tier: 'Platinum', price: 3000000, color: '#102333', accent: '#D4B66A',
         privileges: [
             '5 days free stay in Guest House yearly',
             '30% discount on guest room rents',
@@ -51,7 +51,7 @@ const PLAN_UI_DATA = {
         ]
     },
     gold: {
-        name: 'Core Investor', tier: 'Gold', price: 2000000, color: '#153F35', accent: '#E8D3A3',
+        name: 'Core Investor', tier: 'Gold', price: 2000000, color: '#102333', accent: '#D4B66A',
         privileges: [
             '3 days free stay in Guest House yearly',
             '20% discount on guest room rents',
@@ -68,7 +68,7 @@ const PLAN_UI_DATA = {
         ]
     },
     silver: {
-        name: 'Early Contributor', tier: 'Silver', price: 1000000, color: '#475569', accent: '#94a3b8',
+        name: 'Early Contributor', tier: 'Silver', price: 1000000, color: '#102333', accent: '#D4B66A',
         privileges: [
             '1 day free stay in Guest House yearly',
             '10% discount on guest room rents',
@@ -111,20 +111,12 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
         irrDisplay = (PROJECT_IRR_BASE * 100).toFixed(2) + '%';  // 9.43%
         moneyMultiple = getMoneyMultiple(planModel, lots);
         chipText = 'Based on CA-reviewed investor return model';
-
-    } else if (scenario === 'shutdown') {
-        // Shutdown: Only safety buffer share
-        roiYear15 = getSafetyBufferShare(planModel, lots);
-        irrDisplay = 'Negative (partial capital recovery)';
-        moneyMultiple = roiYear15 / totalCommitment;
-        chipText = 'Based on liquidation surplus after full resident refunds';
-
     } else {
         // Strategic Sale: Cash + sale proceeds
         roiYear15 = getStrategicSaleTotalValue(planModel, lots, saleMultiple);
         irrDisplay = '~10–12%';  // Illustrative range
         moneyMultiple = roiYear15 / totalCommitment;
-        chipText = 'Based on assumed strategic exit valuation';
+        chipText = 'Exit valuation as per CA assumptions';
     }
 
     // Calculate Dividends for Card
@@ -155,10 +147,10 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
     };
 
     return (
-        <section className="relative pt-32 pb-20 overflow-hidden bg-primary">
+        <section className="relative pt-32 pb-20 overflow-hidden bg-mmh-investor-blue">
             {/* Background Elements */}
             <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=2700&auto=format&fit=crop')] bg-cover bg-center opacity-10 mix-blend-overlay" />
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/90 via-primary/95 to-primary" />
+            <div className="absolute inset-0 bg-gradient-to-b from-mmh-investor-blue/90 via-mmh-investor-blue/95 to-mmh-investor-blue" />
 
             <div className="container-custom relative z-10">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
@@ -169,11 +161,11 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
                             <motion.h1
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="text-4xl lg:text-5xl font-serif font-bold text-white leading-tight"
+                                className="text-4xl lg:text-5xl font-serif font-bold text-mmh-ivory leading-tight"
                             >
                                 Investor Scenario Builder
                             </motion.h1>
-                            <p className="text-white/80 text-lg max-w-xl">
+                            <p className="text-mmh-ivory/80 text-lg max-w-xl">
                                 Select a plan and number of units to see your projected returns, ownership share, and privileges.
                             </p>
                         </div>
@@ -184,45 +176,67 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
                                 <div
                                     key={planKey}
                                     onClick={() => setSelectedPlan(planKey)}
-                                    className={`cursor-pointer relative p-6 rounded-xl border transition-all duration-300 ${selectedPlan === planKey
-                                        ? 'shadow-xl transform scale-105'
-                                        : 'bg-white/5 border-white/10 hover:bg-white/10'
+                                    className={`cursor-pointer relative p-6 rounded-xl transition-all duration-300 ${selectedPlan === planKey
+                                        ? 'bg-mmh-investor-blue border-2 border-mmh-gold shadow-2xl transform scale-105'
+                                        : 'bg-mmh-investor-blue/10 border border-mmh-investor-blue/20 hover:bg-mmh-investor-blue/20 hover:border-mmh-gold/30'
                                         }`}
-                                    style={{
-                                        backgroundColor: selectedPlan === planKey ? PLAN_UI_DATA[planKey].color : undefined,
-                                        borderColor: selectedPlan === planKey ? PLAN_UI_DATA[planKey].accent : 'rgba(255, 255, 255, 0.1)'
-                                    }}
                                 >
+                                    {/* Emblem watermark - only visible on selected card */}
                                     {selectedPlan === planKey && (
-                                        <div className="absolute -top-3 -right-3 bg-accent text-primary p-1 rounded-full">
-                                            <CheckCircle2 size={20} />
+                                        <div
+                                            className="absolute inset-0 opacity-[0.08] bg-center bg-contain bg-no-repeat rounded-xl pointer-events-none"
+                                            style={{ backgroundImage: 'url(/logo-emblem.png)' }}
+                                        />
+                                    )}
+
+                                    {/* Golden tick marker for selected card */}
+                                    {selectedPlan === planKey && (
+                                        <div className="absolute -top-3 -right-3 bg-mmh-gold rounded-full p-1.5 shadow-lg z-10">
+                                            <CheckCircle2 size={20} className="text-mmh-investor-blue" />
                                         </div>
                                     )}
-                                    <div className="text-xs uppercase tracking-wider opacity-70">{PLAN_UI_DATA[planKey].tier}</div>
-                                    <div className="font-serif font-bold text-lg">{PLAN_UI_DATA[planKey].name}</div>
-                                    <div className="font-bold">{formatCurrency(PLAN_UI_DATA[planKey].price)}</div>
-                                    <div className="text-[10px] text-white/40 mt-1">per unit</div>
+
+                                    {/* Card content */}
+                                    <div className="relative z-[1]">
+                                        <div className={`text-xs uppercase tracking-wider mb-2 ${selectedPlan === planKey ? 'text-mmh-gold/80' : 'text-mmh-investor-blue/60'
+                                            }`}>
+                                            {PLAN_UI_DATA[planKey].tier}
+                                        </div>
+                                        <div className={`font-serif font-bold text-lg mb-3 ${selectedPlan === planKey ? 'text-mmh-ivory' : 'text-mmh-investor-blue'
+                                            }`}>
+                                            {PLAN_UI_DATA[planKey].name}
+                                        </div>
+                                        <div className={`font-bold text-2xl ${selectedPlan === planKey ? 'text-mmh-gold' : 'text-mmh-investor-blue/70'
+                                            }`}>
+                                            {formatCurrency(PLAN_UI_DATA[planKey].price)}
+                                        </div>
+                                        <div className={`text-[10px] mt-1 ${selectedPlan === planKey ? 'text-mmh-ivory/60' : 'text-mmh-investor-blue/40'
+                                            }`}>
+                                            per unit
+                                        </div>
+                                    </div>
                                 </div>
                             ))}
                         </div>
 
                         {/* Lots Selector */}
-                        <div className="bg-white/5 border border-white/10 rounded-xl p-6 flex items-center justify-between">
+                        <div className="bg-mmh-investor-blue/50 border border-mmh-gold/30 rounded-xl p-6 flex items-center justify-between">
                             <div>
-                                <div className="text-white font-bold mb-1">Number of Lots</div>
-                                <div className="text-white/60 text-sm">Multiply your investment units</div>
+                                <div className="text-mmh-ivory font-bold mb-1">Number of Lots</div>
+                                <div className="text-mmh-ivory/60 text-sm">Multiply your investment units</div>
                             </div>
-                            <div className="flex items-center gap-4 bg-black/20 rounded-lg p-2">
+                            <div className="flex items-center gap-4 bg-mmh-investor-blue/80 rounded-lg p-2 border border-mmh-gold/20">
                                 <button
                                     onClick={() => setLots(Math.max(1, lots - 1))}
-                                    className="p-2 hover:bg-white/10 rounded-lg text-white transition-colors"
+                                    className="p-2 hover:bg-mmh-gold/20 rounded-lg text-mmh-gold transition-colors"
+                                    disabled={lots <= 1}
                                 >
                                     <Minus size={20} />
                                 </button>
-                                <span className="text-2xl font-bold text-white w-8 text-center">{lots}</span>
+                                <div className="w-16 text-center font-bold text-2xl text-mmh-gold">{lots}</div>
                                 <button
-                                    onClick={() => setLots(Math.min(10, lots + 1))}
-                                    className="p-2 hover:bg-white/10 rounded-lg text-white transition-colors"
+                                    onClick={() => setLots(lots + 1)}
+                                    className="p-2 hover:bg-mmh-gold/20 rounded-lg text-mmh-gold transition-colors"
                                 >
                                     <Plus size={20} />
                                 </button>
@@ -232,22 +246,18 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
 
                     {/* Right: Metrics Panel */}
                     <div className="lg:col-span-5">
-                        <Card className="bg-white/5 border-white/10 backdrop-blur-sm p-8 relative overflow-hidden">
-                            {/* Toggle & Download */}
-                            <div className="flex justify-between items-start mb-6">
-                                {/* Scenario Selector */}
-                                <div className="flex gap-2 mb-6">
+                        <Card className="bg-mmh-investor-blue/95 border-mmh-gold/20 backdrop-blur-sm p-8 relative overflow-hidden rounded-[20px]">
+                            {/* Scenario Tabs & Download */}
+                            <div className="flex justify-between items-start mb-8">
+                                {/* Scenario Tabs - Premium Gold Pills */}
+                                <div className="flex gap-3">
                                     {SCENARIOS.map((scenarioOption) => (
                                         <button
                                             key={scenarioOption.id}
                                             onClick={() => setScenario(scenarioOption.id)}
-                                            className={`flex-1 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200 ${scenario === scenarioOption.id
-                                                ? scenarioOption.badgeColor === 'danger'
-                                                    ? 'bg-red-500 text-white shadow-lg'
-                                                    : scenarioOption.badgeColor === 'accent'
-                                                        ? 'bg-accent text-primary shadow-lg'
-                                                        : 'bg-primary text-white shadow-lg'
-                                                : 'bg-white/10 text-white/60 hover:bg-white/20'
+                                            className={`px-6 py-2.5 rounded-full text-sm font-bold uppercase tracking-wider transition-all ${scenario === scenarioOption.id
+                                                ? 'bg-mmh-gold text-mmh-investor-blue shadow-lg'
+                                                : 'border-2 border-mmh-gold text-mmh-gold hover:bg-mmh-gold/10'
                                                 }`}
                                         >
                                             {scenarioOption.label}
@@ -255,142 +265,94 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
                                     ))}
                                 </div>
 
-                                {/* Strategic Sale Multiple Selector (conditionally visible) */}
-                                {scenario === 'strategicSale' && (
-                                    <div className="mb-6 p-4 bg-accent/10 border border-accent/30 rounded-lg">
-                                        <div className="text-xs text-accent font-bold uppercase tracking-wider mb-3">
-                                            Exit Valuation Multiple
-                                        </div>
-                                        <div className="flex gap-2 mb-3">
-                                            {(['8x', '10x', '12x'] as SaleMultiple[]).map((multiple) => (
-                                                <button
-                                                    key={multiple}
-                                                    onClick={() => {
-                                                        // Note: Currently saleMultiple is not stateful
-                                                        // This will be functional when we add state back
-                                                    }}
-                                                    className={`flex-1 px-3 py-2 rounded text-sm font-bold transition-all ${saleMultiple === multiple
-                                                        ? 'bg-accent text-primary shadow-md'
-                                                        : 'bg-white/10 text-white/70 hover:bg-white/20'
-                                                        }`}
-                                                >
-                                                    {multiple}
-                                                </button>
-                                            ))}
-                                        </div>
-                                        <div className="text-xs text-white/60 leading-relaxed italic">
-                                            Strategic sale outcomes are illustrative ranges based on assumed exit valuations (not CA-certified).
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Shutdown Warning Banner (conditionally visible) */}
+                                {/* Download Button */}
                                 <button
                                     onClick={handleDownloadPDF}
-                                    className="flex items-center gap-2 text-accent hover:text-white transition-colors text-xs font-bold uppercase tracking-wider"
+                                    className="flex items-center gap-2 text-mmh-gold hover:text-mmh-ivory transition-colors text-xs font-bold uppercase tracking-wider"
                                 >
                                     <Download size={16} />
                                     Download PDF
                                 </button>
                             </div>
 
-                            {scenario === 'shutdown' && (
-                                <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-3">
-                                    <AlertTriangle size={16} className="text-red-400 mt-0.5 flex-shrink-0" />
-                                    <p className="text-xs text-red-200/80 leading-relaxed">
-                                        <strong>Shutdown Mode:</strong> Assumes Year 15 closure with full resident refunds and liquidation of financial assets. For illustration only.
-                                    </p>
-                                </div>
-                            )}
-
+                            {/* ROI and Metrics */}
                             <div className="relative z-10">
-                                <div className="text-white/60 text-sm font-medium mb-2">ROI at Year 15</div>
-                                <div className="text-4xl lg:text-5xl font-serif font-bold text-accent mb-2">
+                                <div className="text-mmh-ivory/60 text-sm font-medium mb-2">ROI at Year 15</div>
+                                <div className="text-4xl lg:text-5xl font-serif font-bold text-mmh-gold mb-2">
                                     {formatCurrencyINR(roiYear15)}
                                 </div>
-                                <div className="inline-flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full text-[10px] text-white/80 mb-8">
+                                <div className="inline-flex items-center gap-2 bg-mmh-ivory/10 px-3 py-1 rounded-full text-[10px] text-mmh-ivory/80 mb-8">
                                     {chipText}
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-6 pt-6 border-t border-white/10">
+                                <div className="grid grid-cols-2 gap-6 pt-6 border-t border-mmh-ivory/10">
                                     <div>
-                                        <div className="text-white/60 text-xs font-medium mb-1">Target IRR</div>
-                                        <div className="text-2xl font-serif font-bold text-white">{irrDisplay}</div>
+                                        <div className="text-mmh-ivory/60 text-xs font-medium mb-1">Target IRR</div>
+                                        <div className="text-2xl font-serif font-bold text-mmh-ivory">{irrDisplay}</div>
                                     </div>
                                     <div>
-                                        <div className="text-white/60 text-xs font-medium mb-1">Money Multiple</div>
-                                        <div className="text-2xl font-serif font-bold text-white">{moneyMultiple.toFixed(2)}x</div>
+                                        <div className="text-mmh-ivory/60 text-xs font-medium mb-1">Money Multiple</div>
+                                        <div className="text-2xl font-serif font-bold text-mmh-ivory">{moneyMultiple.toFixed(2)}x</div>
                                     </div>
                                 </div>
 
-                                <div className="mt-6 pt-4 border-t border-white/10 flex justify-between items-end">
+                                <div className="mt-6 pt-4 border-t border-mmh-ivory/10 flex justify-between items-end">
                                     <div>
-                                        <div className="text-white/40 text-[10px] uppercase tracking-wider mb-1">Total Commitment</div>
-                                        <div className="text-lg font-bold text-white">{formatCurrencyINR(totalCommitment)}</div>
-                                        <div className="text-accent text-[10px] font-medium mt-1">
+                                        <div className="text-mmh-ivory/40 text-[10px] uppercase tracking-wider mb-1">Total Commitment</div>
+                                        <div className="text-lg font-bold text-mmh-ivory">{formatCurrencyINR(totalCommitment)}</div>
+                                        <div className="text-mmh-gold text-[10px] font-medium mt-1">
                                             Ownership in Project: {equityStakePct.toFixed(2)}% of total equity pool
                                         </div>
                                     </div>
-
-                                    {/* Download Button */}
-                                    <button
-                                        onClick={handleDownloadPDF}
-                                        className="flex items-center gap-2 text-accent hover:text-white transition-colors text-xs font-bold"
-                                    >
-                                        <Download size={14} />
-                                        <span className="text-[10px] uppercase tracking-wider">PDF</span>
-                                    </button>
                                 </div>
 
                                 {/* Enhanced Metrics (CA-Grade) */}
-                                <div className="mt-4 pt-4 border-t border-white/10 space-y-3 text-xs">
+                                <div className="mt-4 pt-4 border-t border-mmh-ivory/10 space-y-3 text-xs">
                                     {/* Total Cash Distributions */}
                                     <div className="flex justify-between items-center">
-                                        <div className="text-white/60">Total Cash Distributed (15 yrs)</div>
-                                        <div className="text-white font-bold">
+                                        <div className="text-mmh-ivory/60">Total Cash Distributed (15 yrs)</div>
+                                        <div className="text-mmh-ivory font-bold">
                                             {formatCurrencyINR((planModel.interestTotal + planModel.dividendsTotal + planModel.profitShareTotal) * lots)}
                                         </div>
                                     </div>
 
-                                    {/* Residual Value (hide in shutdown) */}
-                                    {scenario !== 'shutdown' && (
-                                        <div className="flex justify-between items-center">
-                                            <div className="text-white/60">Residual Stake Value (Yr 15)</div>
-                                            <div className="text-white font-bold">
-                                                {formatCurrencyINR(planModel.residualValue * lots)}
-                                            </div>
+                                    {/* Residual Value */}
+                                    <div className="flex justify-between items-center">
+                                        <div className="text-mmh-ivory/60">Residual Stake Value (Yr 15)</div>
+                                        <div className="text-mmh-ivory font-bold">
+                                            {formatCurrencyINR(planModel.residualValue * lots)}
                                         </div>
-                                    )}
+                                    </div>
 
-                                    {/* Safety Buffer Share (emphasize in shutdown) */}
-                                    <div className={`flex justify-between items-center p-2 rounded ${scenario === 'shutdown' ? 'bg-red-500/10 border border-red-500/20' : ''}`}>
-                                        <div className={scenario === 'shutdown' ? 'text-red-300 font-bold' : 'text-white/40 text-[10px]'}>
+                                    {/* Safety Buffer Share */}
+                                    <div className={`flex justify-between items-center p-2 rounded ${scenario === 'shutdown' ? 'bg-red-500/10 border border-red-500/20' : 'bg-mmh-ivory/5'}`}>
+                                        <div className={scenario === 'shutdown' ? 'text-red-300 font-bold' : 'text-mmh-ivory/40 text-[10px]'}>
                                             {scenario === 'shutdown' ? 'Your Share of Safety Surplus' : 'Safety Buffer (if liquidated)'}
                                         </div>
-                                        <div className={scenario === 'shutdown' ? 'text-red-200 font-bold' : 'text-white/40'}>
+                                        <div className={scenario === 'shutdown' ? 'text-red-200 font-bold' : 'text-mmh-ivory/40'}>
                                             {formatCurrencyINR(getSafetyBufferShare(planModel, lots))}
                                         </div>
                                     </div>
 
                                     {/* Coverage Ratio (footer note) */}
-                                    <div className="pt-2 mt-2 border-t border-white/5">
-                                        <div className="text-white/40 text-[10px] leading-relaxed">
-                                            <strong className="text-white/60">Resident refund coverage at Year 15:</strong> ₹67.12 Cr assets vs ₹61.39 Cr liabilities (Coverage ratio: 1.09×)
+                                    <div className="pt-2 mt-2 border-t border-mmh-ivory/5">
+                                        <div className="text-mmh-ivory/40 text-[10px] leading-relaxed">
+                                            <strong className="text-mmh-ivory/60">Resident refund coverage at Year 15:</strong> ₹67.12 Cr assets vs ₹61.39 Cr liabilities (Coverage ratio: 1.09×)
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </Card>
-
-                        <DividendCard
-                            breakdown={breakdown}
-                            totalDividends={totalDividends}
-                            avgAnnualDividend={avgAnnualDividend}
-                            returnPercentage={returnPercentage}
-                        />
                     </div>
                 </div>
+
+                <DividendCard
+                    breakdown={breakdown}
+                    totalDividends={totalDividends}
+                    avgAnnualDividend={avgAnnualDividend}
+                    returnPercentage={returnPercentage}
+                />
             </div>
-        </section>
+        </section >
     );
 };
