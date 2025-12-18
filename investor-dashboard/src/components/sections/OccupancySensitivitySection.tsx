@@ -1,16 +1,55 @@
 import React, { useState } from 'react';
 import { Card } from '../ui/Card';
 import { ShieldCheck, AlertTriangle } from 'lucide-react';
+import { getCAOutcome, getProjectTotals, type RiskModel, getRiskDescription } from '../../lib/financialModel';
+
+const RISK_MODELS: { id: RiskModel; label: string }[] = [
+    { id: 'AGGRESSIVE', label: 'Aggressive' },
+    { id: 'MODERATE', label: 'Moderate' },
+    { id: 'CONSERVATIVE', label: 'Conservative' },
+];
 
 export const OccupancySensitivitySection: React.FC = () => {
     const [occupancy, setOccupancy] = useState(80);
+    const [riskModel, setRiskModel] = useState<RiskModel>('MODERATE');
 
-    // Simple mapping logic for demo purposes
+    // Get Base Metrics from CA Model
+    // We use Platinum 1 unit as a baseline for IRR/CAGR since CAGR is constant across tiers
+    const caOutcome = getCAOutcome(riskModel, 'PLATINUM', 1);
+    const baseCagr = caOutcome.expectedCagr;
+
+    // Get Coverage Ratio
+    const totals = getProjectTotals(riskModel);
+    const totalAssets = totals.fdPool + totals.currentAssets;
+    const liability = totals.liabilityInmates;
+    const coverageRatio = totalAssets / liability;
+
+    // Dynamic Metrics Calculation
     const getMetrics = (occ: number) => {
-        if (occ >= 90) return { irr: '9.2%', status: 'Excellent', color: 'text-green-600', buffer: 'High' };
-        if (occ >= 80) return { irr: '8.68%', status: 'Safe', color: 'text-primary', buffer: 'Healthy' };
-        if (occ >= 70) return { irr: '7.5%', status: 'Stable', color: 'text-yellow-600', buffer: 'Moderate' };
-        return { irr: '6.0%', status: 'Tight', color: 'text-risk', buffer: 'Low' };
+        // Simple linear reduction logic for illustration
+        // 100% occ = Base CAGR + 0.5% (bonus)
+        // 80% occ = Base CAGR
+        // 60% occ = Base CAGR - 2.0%
+
+        const deviation = (occ - 80) / 20; // -1 at 60%, 0 at 80%, +1 at 100%
+        let adjustedIrr = baseCagr + (deviation * 1.0); // +/- 1% swing roughly
+
+        // Cap/Floor for realism
+        if (adjustedIrr < 0) adjustedIrr = 0;
+
+        let status = 'Stable';
+        let color = 'text-primary';
+
+        if (occ >= 90) { status = 'Excellent'; color = 'text-green-600'; }
+        else if (occ >= 80) { status = 'Safe'; color = 'text-primary'; }
+        else if (occ >= 70) { status = 'Breakeven'; color = 'text-yellow-600'; }
+        else { status = 'Stress'; color = 'text-red-600'; }
+
+        return {
+            irr: adjustedIrr.toFixed(2) + '%',
+            status,
+            color
+        };
     };
 
     const metrics = getMetrics(occupancy);
@@ -24,6 +63,28 @@ export const OccupancySensitivitySection: React.FC = () => {
                     <p className="text-lg text-secondary/80 max-w-2xl mx-auto">
                         Test the model's resilience. We break even at ~65-70% occupancy.
                     </p>
+
+                    {/* Risk Model Selector */}
+                    <div className="mt-8 flex flex-col items-center">
+                        <div className="text-xs uppercase tracking-wider mb-2 font-bold text-secondary/60">Select Risk Model</div>
+                        <div className="bg-white p-1 rounded-lg border border-gray-200 inline-flex shadow-sm">
+                            {RISK_MODELS.map((model) => (
+                                <button
+                                    key={model.id}
+                                    onClick={() => setRiskModel(model.id)}
+                                    className={`px-4 py-2 text-xs font-bold rounded-md transition-all ${riskModel === model.id
+                                        ? 'bg-primary text-white shadow-sm'
+                                        : 'text-secondary/60 hover:text-primary hover:bg-gray-100'
+                                        }`}
+                                >
+                                    {model.label}
+                                </button>
+                            ))}
+                        </div>
+                        <p className="mt-2 text-sm text-secondary/60 italic">
+                            {getRiskDescription(riskModel)}
+                        </p>
+                    </div>
                 </div>
 
                 <div className="max-w-3xl mx-auto">
@@ -61,13 +122,17 @@ export const OccupancySensitivitySection: React.FC = () => {
                             <div className="bg-offwhite rounded-xl p-4 text-center border border-border">
                                 <div className="text-secondary/60 text-sm font-medium mb-1">Refund Coverage</div>
                                 <div className="text-xl font-bold text-primary flex items-center justify-center gap-2">
-                                    <ShieldCheck size={20} className="text-green-600" /> 100%
+                                    <ShieldCheck size={20} className={coverageRatio >= 1 ? "text-green-600" : "text-red-600"} />
+                                    {coverageRatio >= 1 ? "100%" : `${(coverageRatio * 100).toFixed(0)}%`}
+                                </div>
+                                <div className="text-[10px] text-secondary/50 mt-1 leading-tight">
+                                    Based on {riskModel.toLowerCase()} asset allocation.
                                 </div>
                             </div>
                             <div className="bg-offwhite rounded-xl p-4 text-center border border-border">
                                 <div className="text-secondary/60 text-sm font-medium mb-1">Health Status</div>
                                 <div className={`text-xl font-bold ${metrics.color} flex items-center justify-center gap-2`}>
-                                    {metrics.status === 'Tight' && <AlertTriangle size={20} />}
+                                    {metrics.status === 'Stress' && <AlertTriangle size={20} />}
                                     {metrics.status}
                                 </div>
                             </div>

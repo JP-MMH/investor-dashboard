@@ -29,19 +29,19 @@ export const Demand: React.FC = () => {
                         <ul className="space-y-4 text-secondary/80 leading-relaxed">
                             <li className="flex items-start gap-3">
                                 <span className="w-1.5 h-1.5 rounded-full bg-accent mt-2.5 flex-shrink-0" />
-                                <span><strong>Ageing Population:</strong> Kerala has a rapidly ageing demographic with many children living abroad (NRIs).</span>
+                                <span><strong>Market Drivers:</strong> Kerala has a rapidly ageing demographic. With many children living abroad (NRIs), there is a critical need for managed care.</span>
                             </li>
                             <li className="flex items-start gap-3">
                                 <span className="w-1.5 h-1.5 rounded-full bg-accent mt-2.5 flex-shrink-0" />
-                                <span><strong>Cultural Shift:</strong> Families want high-quality care for parents, moving away from traditional "old-age homes" to premium lifestyle communities.</span>
+                                <span><strong>Supply Gap:</strong> While "old-age homes" exist, there is a massive shortage of premium, medically integrated retirement communities that offer a dignified lifestyle.</span>
                             </li>
                             <li className="flex items-start gap-3">
                                 <span className="w-1.5 h-1.5 rounded-full bg-accent mt-2.5 flex-shrink-0" />
-                                <span><strong>Limited Supply:</strong> Very few medically integrated, premium retirement communities exist in the region.</span>
+                                <span><strong>Pricing Power:</strong> Our "Asset-Backed + Liquid Pool" model allows us to offer competitive entry points while maintaining high service standards, unlike pure real estate plays.</span>
                             </li>
                             <li className="flex items-start gap-3">
                                 <span className="w-1.5 h-1.5 rounded-full bg-accent mt-2.5 flex-shrink-0" />
-                                <span><strong>Value Prop:</strong> Mater Maria offers "hospital-adjacent comfort with hospitality-grade experience."</span>
+                                <span><strong>Transparency:</strong> We report quarterly on occupancy, cash pool status, and refund liabilities, ensuring you are never in the dark.</span>
                             </li>
                         </ul>
                     </motion.div>

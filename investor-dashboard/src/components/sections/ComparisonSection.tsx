@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { formatCurrency } from '../../lib/utils';
 import { YearlyProjectionChart } from './YearlyProjectionChart';
 import { BreakdownTable } from './BreakdownTable';
+import { Modal } from '../ui/Modal';
 import { calculateYearlyBreakdown, calculateInvestorMetrics, getRiskDescription, type PlanType, type RiskModel } from '../../lib/financialModel';
 
 interface ComparisonSectionProps {
@@ -19,6 +20,7 @@ const RISK_MODELS: { id: RiskModel; label: string }[] = [
 
 export const ComparisonSection: React.FC<ComparisonSectionProps> = ({ amount, selectedPlan, lots }) => {
     const [riskModel, setRiskModel] = useState<RiskModel>('MODERATE');
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const planName = selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1);
 
     // Calculate breakdown data
@@ -47,8 +49,8 @@ export const ComparisonSection: React.FC<ComparisonSectionProps> = ({ amount, se
                                     key={model.id}
                                     onClick={() => setRiskModel(model.id)}
                                     className={`px-4 py-2 text-xs font-bold rounded-md transition-all ${riskModel === model.id
-                                            ? 'bg-primary text-white shadow-sm'
-                                            : 'text-secondary/60 hover:text-primary hover:bg-gray-100'
+                                        ? 'bg-primary text-white shadow-sm'
+                                        : 'text-secondary/60 hover:text-primary hover:bg-gray-100'
                                         }`}
                                 >
                                     {model.label}
@@ -133,9 +135,23 @@ export const ComparisonSection: React.FC<ComparisonSectionProps> = ({ amount, se
                         mmRate={metrics.expectedCagr}
                         planName={planName}
                     />
-                    <div className="mt-12">
-                        <BreakdownTable data={breakdownData} />
+
+                    <div className="mt-12 text-center">
+                        <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-primary/20 rounded-full text-primary font-bold hover:bg-primary hover:text-white transition-all shadow-sm"
+                        >
+                            View Detailed Year-by-Year Breakdown
+                        </button>
                     </div>
+
+                    <Modal
+                        isOpen={isModalOpen}
+                        onClose={() => setIsModalOpen(false)}
+                        title={`Year-by-Year Breakdown (${planName} - ${getRiskDescription(riskModel)})`}
+                    >
+                        <BreakdownTable data={breakdownData} />
+                    </Modal>
                 </motion.div>
             </div>
         </section>
