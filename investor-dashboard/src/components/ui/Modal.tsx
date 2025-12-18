@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
-import { createPortal } from 'react-dom';
 
 interface ModalProps {
     isOpen: boolean;
@@ -23,27 +22,39 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
 
     if (!isOpen) return null;
 
-    return createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+            {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+                className="absolute inset-0 bg-mmh-investor-blue/90 backdrop-blur-sm"
                 onClick={onClose}
             />
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                    <h3 className="text-xl font-serif font-bold text-primary">{title}</h3>
+
+            {/* Modal Content - Full screen on mobile, centered on desktop */}
+            <div className="relative w-full h-full sm:h-auto sm:max-h-[90vh] sm:max-w-6xl bg-white rounded-none sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 bg-white sticky top-0 z-10">
+                    {title && (
+                        <h3 className="text-lg sm:text-xl font-serif font-bold text-primary">
+                            {title}
+                        </h3>
+                    )}
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-gray-100 rounded-full transition-colors text-secondary"
+                        className="ml-auto p-2 hover:bg-gray-100 rounded-full transition-colors touch-target"
+                        aria-label="Close modal"
                     >
-                        <X size={20} />
+                        <X size={24} className="text-gray-600" />
                     </button>
                 </div>
-                <div className="flex-1 overflow-y-auto p-6">
-                    {children}
+
+                {/* Content - Scrollable with horizontal overflow support */}
+                <div className="flex-1 overflow-auto p-4 sm:p-6">
+                    <div className="overflow-x-auto">
+                        {children}
+                    </div>
                 </div>
             </div>
-        </div>,
-        document.body
+        </div>
     );
 };
