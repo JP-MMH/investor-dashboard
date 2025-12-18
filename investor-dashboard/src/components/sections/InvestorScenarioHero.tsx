@@ -2,24 +2,18 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '../ui/Card';
 import { formatCurrency } from '../../lib/utils';
-import { Minus, Plus, CheckCircle2, Download } from 'lucide-react';
+import { Minus, Plus, CheckCircle2, Download, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { DividendCard } from './DividendCard';
 import { generateInvestorPDF } from '../../lib/pdfGenerator';
 import {
     calculateYearlyBreakdown,
     formatCurrencyINR,
-    PLANS as MODEL_PLANS,
     SCENARIOS,
-    PROJECT_IRR_BASE,
-    getTotalCommitment,
-    getEconomicValueYear15,
-    getMoneyMultiple,
-    getEquityStakePct,
-    getSafetyBufferShare,
-    getStrategicSaleTotalValue,
+    calculateInvestorMetrics,
+    getRiskDescription,
     type PlanType,
     type ScenarioId,
-    type SaleMultiple,
+    type RiskModel,
 } from '../../lib/financialModel';
 
 interface InvestorScenarioHeroProps {
@@ -84,22 +78,26 @@ const PLAN_UI_DATA = {
     }
 };
 
+const RISK_MODELS: { id: RiskModel; label: string }[] = [
+    { id: 'AGGRESSIVE', label: 'Aggressive' },
+    { id: 'MODERATE', label: 'Moderate' },
+    { id: 'CONSERVATIVE', label: 'Conservative' },
+];
+
 export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
     selectedPlan, setSelectedPlan,
     lots, setLots
 }) => {
-    // Scenario state (replaces isShutdown)
+    // Scenario state
     const [scenario, setScenario] = useState<ScenarioId>('base');
-    const saleMultiple: SaleMultiple = '10x';  // Default, will add selector UI later
+    const [riskModel, setRiskModel] = useState<RiskModel>('MODERATE');
 
     const planUI = PLAN_UI_DATA[selectedPlan];
-    const planModel = MODEL_PLANS[selectedPlan];
 
-    // Calculate scenario-aware metrics
-    const totalCommitment = getTotalCommitment(planModel, lots);
-    const equityStakePct = getEquityStakePct(planModel, lots);
+    // Calculate metrics using new CA model
+    const metrics = calculateInvestorMetrics(selectedPlan, lots, riskModel);
 
-    // Scenario-specific calculations
+    // Scenario-specific display values
     let roiYear15: number;
     let irrDisplay: string;
     let moneyMultiple: number;
@@ -107,40 +105,40 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
 
     if (scenario === 'base') {
         // Base Case: CA-reviewed model
-        roiYear15 = getEconomicValueYear15(planModel, lots);
-        irrDisplay = (PROJECT_IRR_BASE * 100).toFixed(2) + '%';  // 9.43%
-        moneyMultiple = getMoneyMultiple(planModel, lots);
-        chipText = 'Based on CA-reviewed investor return model';
+        roiYear15 = metrics.roiYear15;
+        irrDisplay = metrics.irrDisplay;
+        moneyMultiple = metrics.moneyMultiple;
+        chipText = 'CA-reviewed consolidated investor return';
     } else {
-        // Strategic Sale: Cash + sale proceeds
-        roiYear15 = getStrategicSaleTotalValue(planModel, lots, saleMultiple);
-        irrDisplay = '~10–12%';  // Illustrative range
-        moneyMultiple = roiYear15 / totalCommitment;
-        chipText = 'Exit valuation as per CA assumptions';
+        // Shutdown Scenario
+        roiYear15 = metrics.shutdownValue;
+        irrDisplay = 'Negative';
+        moneyMultiple = metrics.shutdownMultiple;
+        chipText = 'Conservative stress test (Liquidation)';
     }
 
-    // Calculate Dividends for Card
-    const totalInvestment = totalCommitment; // For backward compatibility
-    const breakdown = calculateYearlyBreakdown(totalInvestment, selectedPlan, lots, false);
-    const totalDividends = breakdown.reduce((sum, row) => sum + row.dividend, 0);
-    const avgAnnualDividend = totalDividends / 15;
-    const returnPercentage = (totalDividends / totalInvestment) * 100;
-    const totalDepositInterest = breakdown.reduce((sum, row) => sum + row.depositInterest, 0);
+    // Calculate Breakdown for Charts (Display Only)
+    const breakdown = calculateYearlyBreakdown(metrics.initialInvestment, selectedPlan, lots, riskModel);
+
+    // For Dividend Card (Displaying Total Cash now)
+    const totalCashDistributed = metrics.totalCashReceived;
+    const avgAnnualCash = totalCashDistributed / 15;
+    const returnPercentage = (totalCashDistributed / metrics.initialInvestment) * 100;
 
     const handleDownloadPDF = () => {
         generateInvestorPDF({
             planName: planUI.name,
             lots,
-            totalCommitment,
-            ownershipPercentage: equityStakePct,
+            totalCommitment: metrics.initialInvestment,
+            ownershipPercentage: 0, // Not used in new model display
             isShutdown: scenario === 'shutdown',
             roiYear15,
             irr: irrDisplay,
             multiple: moneyMultiple,
             schedule: planUI.schedule,
             breakdown,
-            totalDepositInterest,
-            totalDividends,
+            totalDepositInterest: 0, // merged into total cash
+            totalDividends: totalCashDistributed,
             privileges: planUI.privileges,
             exitRule: planUI.exitRule
         });
@@ -171,20 +169,20 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
                         </div>
 
                         {/* Plan Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {(Object.keys(PLAN_UI_DATA) as PlanType[]).map((planKey) => (
                                 <div
                                     key={planKey}
                                     onClick={() => setSelectedPlan(planKey)}
-                                    className={`cursor-pointer relative p-6 rounded-xl transition-all duration-300 ${selectedPlan === planKey
+                                    className={`cursor-pointer relative p-6 rounded-2xl transition-all duration-300 ${selectedPlan === planKey
                                         ? 'bg-mmh-investor-blue border-2 border-mmh-gold shadow-2xl transform scale-105'
-                                        : 'bg-mmh-investor-blue/10 border border-mmh-investor-blue/20 hover:bg-mmh-investor-blue/20 hover:border-mmh-gold/30'
+                                        : 'bg-mmh-investor-blue/30 border border-mmh-gold/40 hover:bg-mmh-investor-blue/40 hover:border-mmh-gold/60'
                                         }`}
                                 >
                                     {/* Emblem watermark - only visible on selected card */}
                                     {selectedPlan === planKey && (
                                         <div
-                                            className="absolute inset-0 opacity-[0.08] bg-center bg-contain bg-no-repeat rounded-xl pointer-events-none"
+                                            className="absolute inset-0 opacity-[0.08] bg-center bg-contain bg-no-repeat rounded-2xl pointer-events-none"
                                             style={{ backgroundImage: 'url(/logo-emblem.png)' }}
                                         />
                                     )}
@@ -196,21 +194,21 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
                                         </div>
                                     )}
 
-                                    {/* Card content */}
+                                    {/* Card content - ALWAYS VISIBLE */}
                                     <div className="relative z-[1]">
-                                        <div className={`text-xs uppercase tracking-wider mb-2 ${selectedPlan === planKey ? 'text-mmh-gold/80' : 'text-mmh-investor-blue/60'
+                                        <div className={`text-xs uppercase tracking-wider mb-2 font-semibold ${selectedPlan === planKey ? 'text-mmh-gold' : 'text-mmh-gold/80'
                                             }`}>
                                             {PLAN_UI_DATA[planKey].tier}
                                         </div>
-                                        <div className={`font-serif font-bold text-lg mb-3 ${selectedPlan === planKey ? 'text-mmh-ivory' : 'text-mmh-investor-blue'
+                                        <div className={`font-serif font-bold text-lg mb-3 ${selectedPlan === planKey ? 'text-mmh-ivory' : 'text-mmh-ivory/90'
                                             }`}>
                                             {PLAN_UI_DATA[planKey].name}
                                         </div>
-                                        <div className={`font-bold text-2xl ${selectedPlan === planKey ? 'text-mmh-gold' : 'text-mmh-investor-blue/70'
+                                        <div className={`font-bold text-2xl ${selectedPlan === planKey ? 'text-mmh-gold' : 'text-mmh-gold/85'
                                             }`}>
                                             {formatCurrency(PLAN_UI_DATA[planKey].price)}
                                         </div>
-                                        <div className={`text-[10px] mt-1 ${selectedPlan === planKey ? 'text-mmh-ivory/60' : 'text-mmh-investor-blue/40'
+                                        <div className={`text-[10px] mt-1 font-medium ${selectedPlan === planKey ? 'text-mmh-ivory/70' : 'text-mmh-ivory/65'
                                             }`}>
                                             per unit
                                         </div>
@@ -246,17 +244,42 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
 
                     {/* Right: Metrics Panel */}
                     <div className="lg:col-span-5">
-                        <Card className="bg-mmh-investor-blue/95 border-mmh-gold/20 backdrop-blur-sm p-8 relative overflow-hidden rounded-[20px]">
-                            {/* Scenario Tabs & Download */}
-                            <div className="flex justify-between items-start mb-8">
+                        <Card className="bg-mmh-investor-blue/95 border-mmh-gold/20 backdrop-blur-sm p-8 relative overflow-hidden rounded-2xl">
+
+                            {/* RISK MODEL SELECTOR */}
+                            <div className="mb-6">
+                                <div className="text-mmh-ivory/60 text-xs uppercase tracking-wider mb-2 font-semibold">Select Risk Model</div>
+                                <div className="flex bg-mmh-investor-blue/50 p-1 rounded-lg border border-mmh-gold/10">
+                                    {RISK_MODELS.map((model) => (
+                                        <button
+                                            key={model.id}
+                                            onClick={() => setRiskModel(model.id)}
+                                            className={`flex-1 py-2 text-xs font-bold rounded-md transition-all ${riskModel === model.id
+                                                    ? 'bg-mmh-gold text-mmh-investor-blue shadow-sm'
+                                                    : 'text-mmh-ivory/60 hover:text-mmh-ivory hover:bg-mmh-ivory/5'
+                                                }`}
+                                        >
+                                            {model.label}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="mt-2 text-[10px] text-mmh-ivory/50 text-center italic">
+                                    {getRiskDescription(riskModel)}
+                                </div>
+                            </div>
+
+                            {/* Scenario Tabs & Download - ALIGNED IN ONE ROW */}
+                            <div className="flex items-center justify-between gap-4 mb-8">
                                 {/* Scenario Tabs - Premium Gold Pills */}
-                                <div className="flex gap-3">
+                                <div className="flex gap-2">
                                     {SCENARIOS.map((scenarioOption) => (
                                         <button
                                             key={scenarioOption.id}
                                             onClick={() => setScenario(scenarioOption.id)}
-                                            className={`px-6 py-2.5 rounded-full text-sm font-bold uppercase tracking-wider transition-all ${scenario === scenarioOption.id
-                                                ? 'bg-mmh-gold text-mmh-investor-blue shadow-lg'
+                                            className={`px-5 py-2.5 rounded-full text-sm font-bold uppercase tracking-wider transition-all ${scenario === scenarioOption.id
+                                                ? scenarioOption.id === 'shutdown'
+                                                    ? 'bg-red-600 text-white shadow-lg'
+                                                    : 'bg-mmh-gold text-mmh-investor-blue shadow-lg'
                                                 : 'border-2 border-mmh-gold text-mmh-gold hover:bg-mmh-gold/10'
                                                 }`}
                                         >
@@ -265,13 +288,13 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
                                     ))}
                                 </div>
 
-                                {/* Download Button */}
+                                {/* Download Button - SAME HEIGHT AS TABS */}
                                 <button
                                     onClick={handleDownloadPDF}
-                                    className="flex items-center gap-2 text-mmh-gold hover:text-mmh-ivory transition-colors text-xs font-bold uppercase tracking-wider"
+                                    className="flex items-center gap-2 px-5 py-2.5 rounded-full border-2 border-mmh-gold text-mmh-gold hover:bg-mmh-gold/10 transition-all text-sm font-bold uppercase tracking-wider"
                                 >
                                     <Download size={16} />
-                                    Download PDF
+                                    PDF
                                 </button>
                             </div>
 
@@ -285,9 +308,22 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
                                     {chipText}
                                 </div>
 
+                                {/* SHUTDOWN WARNING BANNER */}
+                                {scenario === 'shutdown' && (
+                                    <div className="mb-6 p-3 bg-red-900/40 border border-red-500/30 rounded-lg text-red-200 text-xs leading-relaxed">
+                                        <strong>⚠️ Shutdown Scenario:</strong> Shutdown scenario assumes full resident refunds and distribution of residual surplus only. This is a conservative stress test, not a projection.
+                                        {metrics.isShortfall && (
+                                            <div className="mt-2 font-bold text-red-300 flex items-center gap-1">
+                                                <AlertTriangle size={12} />
+                                                SHORTFALL DETECTED: Exit due capped by available assets.
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
                                 <div className="grid grid-cols-2 gap-6 pt-6 border-t border-mmh-ivory/10">
                                     <div>
-                                        <div className="text-mmh-ivory/60 text-xs font-medium mb-1">Target IRR</div>
+                                        <div className="text-mmh-ivory/60 text-xs font-medium mb-1">Expected CAGR (CA)</div>
                                         <div className="text-2xl font-serif font-bold text-mmh-ivory">{irrDisplay}</div>
                                     </div>
                                     <div>
@@ -299,10 +335,7 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
                                 <div className="mt-6 pt-4 border-t border-mmh-ivory/10 flex justify-between items-end">
                                     <div>
                                         <div className="text-mmh-ivory/40 text-[10px] uppercase tracking-wider mb-1">Total Commitment</div>
-                                        <div className="text-lg font-bold text-mmh-ivory">{formatCurrencyINR(totalCommitment)}</div>
-                                        <div className="text-mmh-gold text-[10px] font-medium mt-1">
-                                            Ownership in Project: {equityStakePct.toFixed(2)}% of total equity pool
-                                        </div>
+                                        <div className="text-lg font-bold text-mmh-ivory">{formatCurrencyINR(metrics.initialInvestment)}</div>
                                     </div>
                                 </div>
 
@@ -310,34 +343,30 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
                                 <div className="mt-4 pt-4 border-t border-mmh-ivory/10 space-y-3 text-xs">
                                     {/* Total Cash Distributions */}
                                     <div className="flex justify-between items-center">
-                                        <div className="text-mmh-ivory/60">Total Cash Distributed (15 yrs)</div>
+                                        <div className="text-mmh-ivory/60">Total Cash Distributed Over 15 Years (CA Model)</div>
                                         <div className="text-mmh-ivory font-bold">
-                                            {formatCurrencyINR((planModel.interestTotal + planModel.dividendsTotal + planModel.profitShareTotal) * lots)}
+                                            {/* Cash paid is historical, so it remains same in Shutdown unless specified otherwise, but prompt says "show the same cash paid" */}
+                                            {formatCurrencyINR(metrics.totalCashReceived)}
                                         </div>
                                     </div>
 
                                     {/* Residual Value */}
                                     <div className="flex justify-between items-center">
-                                        <div className="text-mmh-ivory/60">Residual Stake Value (Yr 15)</div>
-                                        <div className="text-mmh-ivory font-bold">
-                                            {formatCurrencyINR(planModel.residualValue * lots)}
-                                        </div>
-                                    </div>
-
-                                    {/* Safety Buffer Share */}
-                                    <div className={`flex justify-between items-center p-2 rounded ${scenario === 'shutdown' ? 'bg-red-500/10 border border-red-500/20' : 'bg-mmh-ivory/5'}`}>
-                                        <div className={scenario === 'shutdown' ? 'text-red-300 font-bold' : 'text-mmh-ivory/40 text-[10px]'}>
-                                            {scenario === 'shutdown' ? 'Your Share of Safety Surplus' : 'Safety Buffer (if liquidated)'}
-                                        </div>
-                                        <div className={scenario === 'shutdown' ? 'text-red-200 font-bold' : 'text-mmh-ivory/40'}>
-                                            {formatCurrencyINR(getSafetyBufferShare(planModel, lots))}
+                                        <div className="text-mmh-ivory/60">Amount Due on Exit (Year 15)</div>
+                                        <div className={`font-bold ${scenario === 'shutdown' && metrics.isShortfall ? 'text-red-300' : 'text-mmh-ivory'}`}>
+                                            {scenario === 'shutdown' ? formatCurrencyINR(metrics.shutdownValue) : formatCurrencyINR(metrics.residualValue)}
                                         </div>
                                     </div>
 
                                     {/* Coverage Ratio (footer note) */}
                                     <div className="pt-2 mt-2 border-t border-mmh-ivory/5">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <ShieldCheck size={12} className={metrics.coverageRatio >= 1 ? "text-green-500" : "text-red-500"} />
+                                            <span className="text-mmh-ivory/60 font-bold">Refund coverage at Year 15</span>
+                                        </div>
                                         <div className="text-mmh-ivory/40 text-[10px] leading-relaxed">
-                                            <strong className="text-mmh-ivory/60">Resident refund coverage at Year 15:</strong> ₹67.12 Cr assets vs ₹61.39 Cr liabilities (Coverage ratio: 1.09×)
+                                            Assets vs Liability (Coverage ratio: <span className={metrics.coverageRatio >= 1 ? "text-green-400" : "text-red-400"}>{metrics.coverageRatio.toFixed(2)}×</span>)
+                                            {metrics.isShortfall && <span className="text-red-400 ml-1">- SHORTFALL</span>}
                                         </div>
                                     </div>
                                 </div>
@@ -346,12 +375,15 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
                     </div>
                 </div>
 
-                <DividendCard
-                    breakdown={breakdown}
-                    totalDividends={totalDividends}
-                    avgAnnualDividend={avgAnnualDividend}
-                    returnPercentage={returnPercentage}
-                />
+                {/* Dividend Returns Section - PROPER SPACING */}
+                <div className="mt-12">
+                    <DividendCard
+                        breakdown={breakdown}
+                        totalDividends={totalCashDistributed}
+                        avgAnnualDividend={avgAnnualCash}
+                        returnPercentage={returnPercentage}
+                    />
+                </div>
             </div>
         </section >
     );

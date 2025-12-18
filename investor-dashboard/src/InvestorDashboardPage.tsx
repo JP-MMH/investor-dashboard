@@ -43,7 +43,7 @@ export const InvestorDashboardPage: React.FC = () => {
 
                 <RefundSafetySection amount={totalInvestment} />
 
-                <ComparisonSection amount={totalInvestment} selectedPlan={selectedPlan} isShutdown={false} lots={lots} />
+                <ComparisonSection amount={totalInvestment} selectedPlan={selectedPlan} lots={lots} />
 
                 <OccupancySensitivitySection />
 

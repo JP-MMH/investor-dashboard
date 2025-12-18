@@ -21,10 +21,10 @@ export const DividendCard: React.FC<DividendCardProps> = ({
                 <div>
                     <div className="flex items-center gap-2 mb-2">
                         <BarChart3 className="text-mmh-gold" size={24} />
-                        <h3 className="text-xl font-serif font-bold text-mmh-gold">Dividend Returns</h3>
+                        <h3 className="text-xl font-serif font-bold text-mmh-gold">Cash Distributions (CA Model)</h3>
                     </div>
                     <p className="text-mmh-ivory/60 text-sm">
-                        Annual dividend distributions over 15 years
+                        Total cash paid to investor over 15 years
                     </p>
                 </div>
             </div>
@@ -32,7 +32,7 @@ export const DividendCard: React.FC<DividendCardProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="p-4 bg-mmh-investor-blue/80 rounded-lg border border-mmh-gold/10">
                     <div className="text-mmh-ivory/60 text-xs uppercase tracking-wider mb-2">
-                        Total Dividends
+                        Total Cash Paid
                     </div>
                     <div className="text-2xl font-serif font-bold text-mmh-gold">
                         {formatCurrency(totalDividends)}

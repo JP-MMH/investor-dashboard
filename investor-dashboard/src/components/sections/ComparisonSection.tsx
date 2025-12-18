@@ -1,22 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { formatCurrency } from '../../lib/utils';
 import { YearlyProjectionChart } from './YearlyProjectionChart';
 import { BreakdownTable } from './BreakdownTable';
-import { calculateYearlyBreakdown, type PlanType } from '../../lib/financialModel';
+import { calculateYearlyBreakdown, calculateInvestorMetrics, getRiskDescription, type PlanType, type RiskModel } from '../../lib/financialModel';
 
 interface ComparisonSectionProps {
     amount: number;
     selectedPlan: PlanType;
-    isShutdown: boolean;
     lots: number;
 }
 
-export const ComparisonSection: React.FC<ComparisonSectionProps> = ({ amount, selectedPlan, isShutdown, lots }) => {
+const RISK_MODELS: { id: RiskModel; label: string }[] = [
+    { id: 'AGGRESSIVE', label: 'Aggressive' },
+    { id: 'MODERATE', label: 'Moderate' },
+    { id: 'CONSERVATIVE', label: 'Conservative' },
+];
+
+export const ComparisonSection: React.FC<ComparisonSectionProps> = ({ amount, selectedPlan, lots }) => {
+    const [riskModel, setRiskModel] = useState<RiskModel>('MODERATE');
     const planName = selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1);
 
     // Calculate breakdown data
-    const breakdownData = calculateYearlyBreakdown(amount, selectedPlan, lots, isShutdown);
+    const breakdownData = calculateYearlyBreakdown(amount, selectedPlan, lots, riskModel);
+    const metrics = calculateInvestorMetrics(selectedPlan, lots, riskModel);
 
     // Get Year 15 values for the table
     const year15 = breakdownData[breakdownData.length - 1];
@@ -30,6 +37,28 @@ export const ComparisonSection: React.FC<ComparisonSectionProps> = ({ amount, se
                     <p className="text-lg text-secondary/80 max-w-2xl mx-auto">
                         See how Mater Maria stacks up against traditional investment instruments in terms of returns, safety, and asset backing.
                     </p>
+
+                    {/* Risk Model Selector */}
+                    <div className="mt-8 flex flex-col items-center">
+                        <div className="text-xs uppercase tracking-wider mb-2 font-bold text-secondary/60">Select Scenario</div>
+                        <div className="bg-white p-1 rounded-lg border border-gray-200 inline-flex shadow-sm">
+                            {RISK_MODELS.map((model) => (
+                                <button
+                                    key={model.id}
+                                    onClick={() => setRiskModel(model.id)}
+                                    className={`px-4 py-2 text-xs font-bold rounded-md transition-all ${riskModel === model.id
+                                            ? 'bg-primary text-white shadow-sm'
+                                            : 'text-secondary/60 hover:text-primary hover:bg-gray-100'
+                                        }`}
+                                >
+                                    {model.label}
+                                </button>
+                            ))}
+                        </div>
+                        <p className="mt-2 text-sm text-secondary/60 italic">
+                            {getRiskDescription(riskModel)}
+                        </p>
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -84,7 +113,7 @@ export const ComparisonSection: React.FC<ComparisonSectionProps> = ({ amount, se
                                         <span className="bg-accent text-white text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">Recommended</span>
                                     </td>
                                     <td className="px-6 py-4 font-bold text-accent text-xl">{formatCurrency(year15.closingValue)}</td>
-                                    <td className="px-6 py-4 font-bold text-primary">9.06%</td>
+                                    <td className="px-6 py-4 font-bold text-primary">{metrics.irrDisplay}</td>
                                     <td className="px-6 py-4 text-green-700 font-bold">High (Asset Backed)</td>
                                     <td className="px-6 py-4 text-green-700 font-bold">Low</td>
                                 </tr>
@@ -101,7 +130,7 @@ export const ComparisonSection: React.FC<ComparisonSectionProps> = ({ amount, se
                 >
                     <YearlyProjectionChart
                         amount={amount}
-                        mmRate={9.06}
+                        mmRate={metrics.expectedCagr}
                         planName={planName}
                     />
                     <div className="mt-12">
