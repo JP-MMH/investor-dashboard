@@ -252,7 +252,6 @@ var require_react_dom_development = __commonJS({
 // node_modules/react-dom/index.js
 var require_react_dom = __commonJS({
   "node_modules/react-dom/index.js"(exports, module) {
-    "use strict";
     if (false) {
       checkDCE();
       module.exports = null;
@@ -265,4 +264,4 @@ var require_react_dom = __commonJS({
 export {
   require_react_dom
 };
-//# sourceMappingURL=chunk-KP7BIHBJ.js.map
+//# sourceMappingURL=chunk-EKFKCRXB.js.map

@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '../ui/Card';
 import { formatCurrency } from '../../lib/utils';
-import { Minus, Plus, CheckCircle2, Download, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Minus, Plus, CheckCircle2, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { DividendCard } from './DividendCard';
-import { generateInvestorPDF } from '../../lib/pdfGenerator';
 import {
     calculateYearlyBreakdown,
     formatCurrencyINR,
@@ -92,8 +91,6 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
     const [scenario, setScenario] = useState<ScenarioId>('base');
     const [riskModel, setRiskModel] = useState<RiskModel>('MODERATE');
 
-    const planUI = PLAN_UI_DATA[selectedPlan];
-
     // Calculate metrics using new CA model
     const metrics = calculateInvestorMetrics(selectedPlan, lots, riskModel);
 
@@ -124,25 +121,6 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
     const totalCashDistributed = metrics.totalCashReceived;
     const avgAnnualCash = totalCashDistributed / 15;
     const returnPercentage = (totalCashDistributed / metrics.initialInvestment) * 100;
-
-    const handleDownloadPDF = () => {
-        generateInvestorPDF({
-            planName: planUI.name,
-            lots,
-            totalCommitment: metrics.initialInvestment,
-            ownershipPercentage: 0, // Not used in new model display
-            isShutdown: scenario === 'shutdown',
-            roiYear15,
-            irr: irrDisplay,
-            multiple: moneyMultiple,
-            schedule: planUI.schedule,
-            breakdown,
-            totalDepositInterest: 0, // merged into total cash
-            totalDividends: totalCashDistributed,
-            privileges: planUI.privileges,
-            exitRule: planUI.exitRule
-        });
-    };
 
     return (
         <section className="relative pt-32 pb-20 overflow-hidden bg-mmh-investor-blue">
@@ -255,8 +233,8 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
                                             key={model.id}
                                             onClick={() => setRiskModel(model.id)}
                                             className={`flex-1 py-2 text-xs font-bold rounded-md transition-all ${riskModel === model.id
-                                                    ? 'bg-mmh-gold text-mmh-investor-blue shadow-sm'
-                                                    : 'text-mmh-ivory/60 hover:text-mmh-ivory hover:bg-mmh-ivory/5'
+                                                ? 'bg-mmh-gold text-mmh-investor-blue shadow-sm'
+                                                : 'text-mmh-ivory/60 hover:text-mmh-ivory hover:bg-mmh-ivory/5'
                                                 }`}
                                         >
                                             {model.label}
@@ -268,34 +246,22 @@ export const InvestorScenarioHero: React.FC<InvestorScenarioHeroProps> = ({
                                 </div>
                             </div>
 
-                            {/* Scenario Tabs & Download - ALIGNED IN ONE ROW */}
-                            <div className="flex items-center justify-between gap-4 mb-8">
-                                {/* Scenario Tabs - Premium Gold Pills */}
-                                <div className="flex gap-2">
-                                    {SCENARIOS.map((scenarioOption) => (
-                                        <button
-                                            key={scenarioOption.id}
-                                            onClick={() => setScenario(scenarioOption.id)}
-                                            className={`px-5 py-2.5 rounded-full text-sm font-bold uppercase tracking-wider transition-all ${scenario === scenarioOption.id
-                                                ? scenarioOption.id === 'shutdown'
-                                                    ? 'bg-red-600 text-white shadow-lg'
-                                                    : 'bg-mmh-gold text-mmh-investor-blue shadow-lg'
-                                                : 'border-2 border-mmh-gold text-mmh-gold hover:bg-mmh-gold/10'
-                                                }`}
-                                        >
-                                            {scenarioOption.label}
-                                        </button>
-                                    ))}
-                                </div>
-
-                                {/* Download Button - SAME HEIGHT AS TABS */}
-                                <button
-                                    onClick={handleDownloadPDF}
-                                    className="flex items-center gap-2 px-5 py-2.5 rounded-full border-2 border-mmh-gold text-mmh-gold hover:bg-mmh-gold/10 transition-all text-sm font-bold uppercase tracking-wider"
-                                >
-                                    <Download size={16} />
-                                    PDF
-                                </button>
+                            {/* Scenario Tabs - Full Width */}
+                            <div className="flex gap-2 w-full">
+                                {SCENARIOS.map((scenarioOption) => (
+                                    <button
+                                        key={scenarioOption.id}
+                                        onClick={() => setScenario(scenarioOption.id)}
+                                        className={`flex-1 px-5 py-2.5 rounded-full text-sm font-bold uppercase tracking-wider transition-all ${scenario === scenarioOption.id
+                                            ? scenarioOption.id === 'shutdown'
+                                                ? 'bg-red-600 text-white shadow-lg'
+                                                : 'bg-mmh-gold text-mmh-investor-blue shadow-lg'
+                                            : 'border-2 border-mmh-gold text-mmh-gold hover:bg-mmh-gold/10'
+                                            }`}
+                                    >
+                                        {scenarioOption.label}
+                                    </button>
+                                ))}
                             </div>
 
                             {/* ROI and Metrics */}
